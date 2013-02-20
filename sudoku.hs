@@ -1,11 +1,14 @@
 -- sudoku solver using backtrack
 module Main where
 
-import System.Environment(getArgs)
+import Control.DeepSeq(deepseq)
 import Data.Char(ord)
 import Data.List(intercalate, elemIndex, find)
 import Data.Maybe(isNothing)
 import Data.Time.Clock(diffUTCTime, getCurrentTime)
+import System.Environment(getArgs)
+import System.IO(hFlush, stdout)
+import Text.Printf(printf)
 
 boardSize = 9
 
@@ -52,6 +55,30 @@ solve sudoku
 	where
 		spot = nextEmpty sudoku 
 
+-- progress bar
+loadBar :: Int -> Int -> Int -> Int -> IO()
+loadBar step totalSteps resolution width = 
+	if (and [(div totalSteps resolution /= 0), (mod step (div totalSteps resolution) /= 0)]) 
+		then do
+			let ratio = (fromIntegral step::Float) / (fromIntegral totalSteps::Float)
+			--let ratio = 1
+			let count = floor (ratio * (fromIntegral width::Float))
+			let perc = floor (ratio * 100)
+			printf "%3d%% [" (perc::Int)
+			mapM (\_ -> printf "=") [0..count-1]
+			mapM (\_ -> printf " ") [count..width-1]
+			printf "]\r"
+			hFlush stdout
+			return()
+		else
+			return()
+
+process :: Int -> Int -> String -> IO String
+process step totalSteps sudoku = do 
+	let result = (toStr . solve . fromStr) sudoku
+	result `deepseq` loadBar step totalSteps 20 50 -- deepseq forces evaluation of result
+	return result
+
 main = do
 	-- read entire file into memory
 	(input:_) <- getArgs
@@ -62,9 +89,11 @@ main = do
 	-- solve all sudokus
 	start <- getCurrentTime
 	let result = intercalate "\n" $ map (toStr . solve .fromStr) $ sudokus
-	writeFile ("solved_" ++ input) result
+	solutions <- mapM (\(step,sudoku) -> process step total sudoku) (zip [1..] sudokus)
+	let result = intercalate "\n" solutions
 	end <- getCurrentTime
 	
 	-- present results
 	putStrLn $ " -- Elapsed time: " ++ (show (diffUTCTime end start))
+	writeFile ("solved_" ++ input) result
 
