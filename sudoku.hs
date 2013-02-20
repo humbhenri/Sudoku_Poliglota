@@ -61,7 +61,6 @@ loadBar step totalSteps resolution width =
 	if (and [(div totalSteps resolution /= 0), (mod step (div totalSteps resolution) /= 0)]) 
 		then do
 			let ratio = (fromIntegral step::Float) / (fromIntegral totalSteps::Float)
-			--let ratio = 1
 			let count = floor (ratio * (fromIntegral width::Float))
 			let perc = floor (ratio * 100)
 			printf "%3d%% [" (perc::Int)
