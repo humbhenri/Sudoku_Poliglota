@@ -119,7 +119,7 @@ object Sudoku {
 		
 		val lines = input.split("\\r?\\n")
 		
-		val progressBar = new ProgressBar(0, lines.length, 100, 100)
+		val progressBar = new ProgressBar(lines.length, 1, 100, 100)
 
 		val lineSep = System.getProperty("line.separator")
 		for (line <- lines) {
