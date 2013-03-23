@@ -172,7 +172,7 @@ class ProgressBar {
         if (step % (totalSteps/resolution) != 0) return;
         float ratio = step/(float)totalSteps;
         int count = (int) (ratio * width);
-        System.out.printf("%3d%% [", (int) ratio * 100);
+        System.out.printf("%3d%% [", (int) (ratio * 100));
         for (int i=0; i<count; i++) System.out.printf("=");
         for (int i=count; i<width; i++) System.out.printf(" ");
         System.out.printf( "]\r ");
