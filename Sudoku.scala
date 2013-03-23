@@ -1,5 +1,7 @@
 import java.io.File
 import java.util.Scanner
+import java.io.BufferedWriter
+import java.io.FileWriter
 
 // Build a sudoku from a 81 char line
 class Sudoku(text: String) {
@@ -21,8 +23,9 @@ class Sudoku(text: String) {
 	override def toString:String =
 	{
 		val sb = new StringBuilder()
-		for (row:Array[Integer] <- this.board) {
-			sb.append((row map (i => i.toString)).mkString(" ")).append("\n")
+		val lineSep = System.getProperty("line.separator")
+		for (row:Array[Integer] <- this.board) yield {
+		  sb.append((row map (i => i.toString)).mkString(" ")).append(lineSep)
 		}
 		sb.toString
 	}
@@ -42,10 +45,11 @@ object SudokuSolver {
 		    		sudoku.board(i)(j) = value
 		    		val sudoku2 = solve(sudoku)
 		    		if (!nextEmpty(sudoku2).isDefined) {
-		    			return sudoku2
+		    			return sudoku2 // solution found
 		    		}
 		    	}
 		    }
+		    // backtrack, solution not found
 		    sudoku.board(i)(j) = 0
 		    return sudoku
 		}
@@ -84,6 +88,22 @@ object SudokuSolver {
 	}
 }
 
+class ProgressBar(var totalSteps:Integer, var step:Integer, var resolution:Integer, var width:Integer) {
+	def advance 
+	{
+		step += 1
+        if (totalSteps/resolution == 0) return
+        if (step % (totalSteps/resolution) != 0) return
+        var ratio:Float = step/totalSteps.toFloat
+        val count:Int = (ratio * width).toInt
+        print("%3d%% [".format((ratio * 100).toInt))
+		(0 to count-1) foreach {_ => print("=")}
+		(count to width-1) foreach {_ => print(" ")}
+        print( "]\r ")
+        System.out.flush()
+	}
+}
+
 object Sudoku {
 
 	def main(args: Array[String]) {
@@ -93,10 +113,27 @@ object Sudoku {
 		// read entire input into memory
 		val input = new Scanner(file, "UTF-8").useDelimiter("\\A").next()
 		
+		val output = new StringBuilder()
+		
+		val before = System.nanoTime
+		
 		val lines = input.split("\\r?\\n")
+		
+		val progressBar = new ProgressBar(0, lines.length, 100, 100)
+
+		val lineSep = System.getProperty("line.separator")
 		for (line <- lines) {
 			val sudoku = new Sudoku(line)
-			println(SudokuSolver.solve(sudoku))
+			output.append(SudokuSolver.solve(sudoku)).append(lineSep)
+			progressBar.advance
 		}
+		
+		// elapsed time
+		println("\nElapsed time: " + ((System.nanoTime - before)/1e6) + " ms")
+		
+		// write solutions to file
+		val writer = new BufferedWriter(new FileWriter("solved_" + file.getName()))
+		writer.write(output.toString)
+		writer.close
 	}
 }
