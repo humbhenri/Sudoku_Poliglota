@@ -59,7 +59,7 @@ Sudoku solve := method(
 // Main program
 
 // read entire file into memory
-entry := System args at(1)
+entry := if(System args size > 1, System args at(1), "input_small.txt")
 input := File open(entry) readToEnd 
 
 // solve all sudokus
