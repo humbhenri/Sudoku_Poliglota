@@ -3,13 +3,14 @@
 (defconstant +board-size+ 81)
 (defconstant +row-size+ 9)
 
-;;; return text inside stream
+;;; read file and resturn contents
 (defun slurp-file (stream)
   (let ((seq (make-array (file-length stream) :element-type 'character :fill-pointer t)))
     (setf (fill-pointer seq) (read-sequence seq stream))
     seq))
 
-;;; text -> board
+
+;;; given a 81 length line returns a 9x9 array
 (defun from-str (text)
   (let ((board (make-array (list +row-size+ +row-size+) :element-type 'integer)))
     (loop
@@ -19,7 +20,8 @@
        do (setf (aref board x y) (digit-char-p i)))
     board))
 
-;;; board -> text
+
+;;; given a 9x9 array returns a string representation
 (defun to-str (board)
   (let ((dims (array-dimensions board))
         (text ""))
@@ -29,11 +31,19 @@
       (setf text (concatenate 'string text (format nil "~%"))))
     (concatenate 'string text (format nil "~%"))))
 
+
+;;; given a 9x9 array sudoku returns the first found soultion or the same sudoku if not solution found
 (defun solve (sudoku)
-  (flet ((next-empty (a-sudoku)
+  
+  ;; helper functions 
+  (flet 
+        ; given a sudoku returns the first row and column with a empty space 
+        ((next-empty (a-sudoku)
            (loop for i from 0 below +row-size+ do
                 (loop for j from 0 below +row-size+
                    when (= (aref a-sudoku i j) 0) do (return-from next-empty (list i j)))))
+
+        ; given a sudoku returns true only if val can be put at row x and column y 
          (can-put (a-sudoku x y val) (and (loop for i from 0 to (- +row-size+ 1)
                                              never (= (aref a-sudoku i y) val) ; test rows
                                              never (= (aref a-sudoku x i) val)) ; test columns
@@ -43,6 +53,7 @@
                                                       (loop for j from sq-y to (+ sq-y 2) do
                                                            (when (= (aref a-sudoku i j) val)
                                                              (return-from outer t)))))))))
+
     (let ((spot (next-empty sudoku)))
       (when spot
         (destructuring-bind (x y) spot
