@@ -7,37 +7,46 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class Sudoku {
+	
+	static class Spot {
+		int row;
+		int col;
+		Spot(int row, int col) {
+			this.row = row;
+			this.col = col;
+		}
+	}
 
     /**
      * The array is modified in place
      * @param sudoku
      */
     public static int[][] solve(int[][] sudoku) {
-        int spot[] = {0, 0};
+        Spot spot = new Spot(0, 0);
         if (!nextEmpty(sudoku, spot)) {
             return sudoku;
         }
 
         for (int i=1; i<10; i++) {
             if (canPut(sudoku, spot, i)) {
-                sudoku[spot[0]][spot[1]] = i;
+                sudoku[spot.row][spot.col] = i;
                 int [][]newSudoku = solve(sudoku);
-                if (!nextEmpty(newSudoku, new int[]{0, 0})) {
+                if (!nextEmpty(newSudoku, new Spot(0, 0))) {
                     return newSudoku;
                 }
             }
         }
 
-        sudoku[spot[0]][spot[1]] = 0; // solution not found, backtrack
+        sudoku[spot.row][spot.col] = 0; // solution not found, backtrack
         return sudoku;
     }
 
-    private static boolean nextEmpty(int[][] sudoku, int[] spot) {
+    private static boolean nextEmpty(int[][] sudoku, Spot spot) {
         for (int i=0; i<sudoku.length; i++) {
             for (int j=0; j<sudoku[i].length; j++) {
                 if (sudoku[i][j] == 0) {
-                    spot[0] = i;
-                    spot[1] = j;
+                    spot.row = i;
+                    spot.col = j;
                     return true;
                 }
             }
@@ -45,9 +54,9 @@ public class Sudoku {
         return false;
     }
 
-    private static boolean canPut(int[][] sudoku, int[] spot, int val) {
-        int x = spot[0];
-        int y = spot[1];
+    private static boolean canPut(int[][] sudoku, Spot spot, int val) {
+        int x = spot.row;
+        int y = spot.col;
         for (int i=0; i<sudoku.length; i++) {
             // test row
             if (sudoku[i][y] == val) {
