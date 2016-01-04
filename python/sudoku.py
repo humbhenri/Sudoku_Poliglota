@@ -1,7 +1,9 @@
 # Sudoku solver using backtrack
 
+import io
 import sys
 import time
+import os
 
 BOARD_SIZE=9
 
@@ -68,12 +70,9 @@ def from_str(data):
     return [map(int,list(row)) for row in rows]
 
 
-def process(filename):
-
-    # read entire file into memory
-    input = open(filename, 'r')
+def process(input, output):
     data = input.read()
-    input.close()
+    print 'data is ' + data
 
     # solve all sudokus
     before = time.time()
@@ -90,16 +89,17 @@ def process(filename):
     after = time.time()
 
     # write solutions to file
-    output = open('solved_' + filename, 'w')
-    output.write('\n\n'.join(result))
-    output.close()
+    output.write(unicode('\n\n'.join(result)))
 
     # present results
     print '--Elapsed %f ms' % ((after-before)*1000)
 
 if __name__ == '__main__':
     try:
-        process(sys.argv[1])
+        filename = sys.argv[1]
+        with io.open(filename, 'r') as input:
+            with io.open('solved_' + os.path.basename(filename), 'w') as output:
+                process(input, output)
     except IndexError:
         print 'Insert file input'
         sys.exit(1)
