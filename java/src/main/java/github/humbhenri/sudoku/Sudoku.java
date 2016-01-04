@@ -1,12 +1,9 @@
-
-import java.io.BufferedReader;
+package github.humbhenri.sudoku;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Sudoku {
@@ -76,6 +73,11 @@ public class Sudoku {
     }
 
     public static void main(String[] args) {
+    	if (args.length == 0) {
+    		System.out.println("input required, please specify a file name with sudokus to solve.");
+    		System.exit(1);
+    	}
+    	
         File file = new File(args[0]);
 
         // read entire file into memory
@@ -173,9 +175,9 @@ class ProgressBar {
         float ratio = step/(float)totalSteps;
         int count = (int) (ratio * width);
         System.out.printf("%3d%% [", (int) (ratio * 100));
-        for (int i=0; i<count; i++) System.out.printf("=");
-        for (int i=count; i<width; i++) System.out.printf(" ");
-        System.out.printf( "]\r ");
+        for (int i=0; i<count; i++) System.out.print("=");
+        for (int i=count; i<width; i++) System.out.print(" ");
+        System.out.print( "]\r");
         System.out.flush();
     }
 }
