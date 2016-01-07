@@ -22,36 +22,38 @@ public class Sudoku {
      * @param sudoku
      */
     public static int[][] solve(int[][] sudoku) {
-        Spot spot = new Spot(0, 0);
-        if (!nextEmpty(sudoku, spot)) {
+        Spot spot = nextEmptySpot(sudoku);
+        if (spot == null) {
             return sudoku;
         }
 
-        for (int i=1; i<10; i++) {
-            if (canPut(sudoku, spot, i)) {
-                sudoku[spot.row][spot.col] = i;
+        for (int tryValue=1; tryValue<10; tryValue++) {
+            if (canPut(sudoku, spot, tryValue)) {
+                put(sudoku, spot, tryValue);
                 int [][]newSudoku = solve(sudoku);
-                if (!nextEmpty(newSudoku, new Spot(0, 0))) {
+                if (nextEmptySpot(newSudoku) == null) {
                     return newSudoku;
                 }
             }
         }
 
-        sudoku[spot.row][spot.col] = 0; // solution not found, backtrack
+        put(sudoku, spot, 0); // solution not found, backtrack
         return sudoku;
     }
 
-    private static boolean nextEmpty(int[][] sudoku, Spot spot) {
+	private static void put(int[][] sudoku, Spot spot, int value) {
+		sudoku[spot.row][spot.col] = value;
+	}
+
+    private static Spot nextEmptySpot(int[][] sudoku) {
         for (int i=0; i<sudoku.length; i++) {
             for (int j=0; j<sudoku[i].length; j++) {
                 if (sudoku[i][j] == 0) {
-                    spot.row = i;
-                    spot.col = j;
-                    return true;
+                    return new Spot(i, j);
                 }
             }
         }
-        return false;
+        return null;
     }
 
     private static boolean canPut(int[][] sudoku, Spot spot, int val) {
@@ -80,6 +82,32 @@ public class Sudoku {
 
         return true;
     }
+    
+
+    public static final int BOARD_SIZE = 9;
+
+    public static int[][] fromString(String data) {
+        int[][] board = new int[BOARD_SIZE][BOARD_SIZE];
+        for (int row = 0; row < BOARD_SIZE; row++) {
+        	for (int col = 0; col < BOARD_SIZE; col++) {
+        		int index = row * BOARD_SIZE + col;
+        		board[row][col] = Character.getNumericValue(data.charAt(index));
+        	}
+        }
+        return board;
+    }
+
+    public static String toString(int[][] board) {
+        StringBuilder out = new StringBuilder();
+        for (int i=0; i<board.length; i++) {
+            for (int j=0; j<board[i].length; j++) {
+                out.append(board[i][j]).append(" ");
+            }
+            out.append("\n");
+        }
+        out.append("\n");
+        return out.toString();
+    }
 
     public static void main(String[] args) {
     	if (args.length == 0) {
@@ -105,8 +133,8 @@ public class Sudoku {
         String []lines = input.split("\\r?\\n");
         ProgressBar bar = new ProgressBar(0, lines.length, 100, 100);
         for (String line : lines) {
-            int [][]sudoku = Board.fromString(line);
-            output.append(Board.toString(solve(sudoku)));
+            int [][]sudoku = fromString(line);
+            output.append(toString(solve(sudoku)));
             bar.advance();
         }
 
@@ -127,42 +155,6 @@ public class Sudoku {
         System.out.println("-- Elapsed time: " + duration + " ms.");
     }
 }
-
-class Board {
-
-    public static final int BOARD_SIZE = 9;
-
-    public static int[][] fromString(String data) {
-        int[][] board = new int[BOARD_SIZE][BOARD_SIZE];
-        int i = 0, j = 0, ch = 0;
-        while (i < BOARD_SIZE && j < BOARD_SIZE) {
-            while (!Character.isDigit(data.charAt(ch))) {
-                ch++;
-            }
-            board[i][j] = data.charAt(ch++) - 48;
-            if (j == BOARD_SIZE - 1) {
-                i += 1 % BOARD_SIZE;
-                j = 0;
-            } else {
-                j += 1 % BOARD_SIZE;
-            }
-        }
-        return board;
-    }
-
-    public static String toString(int[][] board) {
-        StringBuilder out = new StringBuilder();
-        for (int i=0; i<board.length; i++) {
-            for (int j=0; j<board[i].length; j++) {
-                out.append(board[i][j]).append(" ");
-            }
-            out.append("\n");
-        }
-        out.append("\n");
-        return out.toString();
-    }
-}
-
 
 class ProgressBar {
     private int totalSteps;
