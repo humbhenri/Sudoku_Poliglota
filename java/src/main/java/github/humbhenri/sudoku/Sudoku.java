@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Scanner;
 
 public class Sudoku {
@@ -109,51 +114,35 @@ public class Sudoku {
         return out.toString();
     }
 
-    public static void main(String[] args) {
-    	if (args.length == 0) {
+    public static void main(String[] args) throws IOException {
+    	checkRequiredInputFile(args);
+        long before = System.currentTimeMillis();
+        Path input = Paths.get("", args[0]);
+		List<String>lines = Files.readAllLines(input, Charset.defaultCharset());
+		StringBuilder output = solveAllSudokus(lines);
+        long duration = System.currentTimeMillis() - before;
+        Path outputFile = Paths.get(input.getParent().toString(), "solved_" + input.getFileName());
+        Files.write(outputFile, output.toString().getBytes());
+        System.out.println("-- Elapsed time: " + duration + " ms.");
+    }
+
+	private static void checkRequiredInputFile(String[] args) {
+		if (args.length == 0) {
     		System.out.println("input required, please specify a file name with sudokus to solve.");
     		System.exit(1);
     	}
-    	
-        File file = new File(args[0]);
+	}
 
-        // read entire file into memory
-        String input = null;
-        try {
-            input = new Scanner(file, "UTF-8").useDelimiter("\\A").next();
-        } catch (FileNotFoundException e) {
-            System.out.println("Could not find " + file.getName());
-            System.exit(1);
-        }
-
-        // solve all sudokus
-        long before = System.currentTimeMillis();
-
-        StringBuilder output = new StringBuilder();
-        String []lines = input.split("\\r?\\n");
-        ProgressBar bar = new ProgressBar(0, lines.length, 100, 100);
+	private static StringBuilder solveAllSudokus(List<String> lines) {
+		StringBuilder output = new StringBuilder();
+        ProgressBar bar = new ProgressBar(0, lines.size(), 100, 100);
         for (String line : lines) {
             int [][]sudoku = fromString(line);
             output.append(toString(solve(sudoku)));
             bar.advance();
         }
-
-        long duration = System.currentTimeMillis() - before;
-
-        // write solution to file output
-        BufferedWriter writer = null;
-        try {
-            writer = new BufferedWriter(new FileWriter("solved_" + file.getName()));
-            writer.write(output.toString());
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        // time result
-        System.out.println("-- Elapsed time: " + duration + " ms.");
-    }
+		return output;
+	}
 }
 
 class ProgressBar {
