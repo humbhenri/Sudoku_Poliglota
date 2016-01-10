@@ -16,6 +16,8 @@ import (
 
 const boardSize = 9 // rows and column size
 
+type board [][]int
+
 func loadBar(step int, totalSteps int, resolution int, width int) {
 	if totalSteps/resolution == 0 {
 		return
@@ -37,16 +39,16 @@ func loadBar(step int, totalSteps int, resolution int, width int) {
 }
 
 // Build a slice of slices to represent the board from a string
-func fromStr(boardRepr string) [][]int {
-	board := make([][]int, boardSize)
-	for i := range board {
-		board[i] = make([]int, boardSize)
+func fromStr(boardRepr string) board {
+	b := make([][]int, boardSize)
+	for i := 0; i < boardSize; i++ {
+		b[i] = make([]int, boardSize)
 	}
 
 	x, y := 0, 0
 	for i := range boardRepr {
 		if boardRepr[i] >= '0' && boardRepr[i] <= '9' {
-			board[x][y] = int(boardRepr[i]) - 48
+			b[x][y] = int(boardRepr[i]) - 48
 			if y == boardSize-1 {
 				x += 1 % boardSize
 				y = 0
@@ -55,27 +57,35 @@ func fromStr(boardRepr string) [][]int {
 			}
 		}
 	}
-
-	return board
+	return b
 }
 
-// Board to string
-func toStr(board [][]int) string {
-	var b bytes.Buffer
-	for i := range board {
-		for j := range board[i] {
-			b.WriteString(fmt.Sprintf("%d ", board[i][j]))
+func (b *board) get(row, column int) int {
+	bslice := [][]int(*b)
+	return bslice[row][column]
+}
+
+func (b *board) set(row, column, value int) {
+	bslice := [][]int(*b)
+	bslice[row][column] = value
+}
+
+func (b *board) String() string {
+	var buf bytes.Buffer
+	for i := 0; i < boardSize; i++ {
+		for j := 0; j < boardSize; j++ {
+			buf.WriteString(fmt.Sprintf("%d ", b.get(i, j)))
 		}
-		b.WriteString("\n")
+		buf.WriteString("\n")
 	}
-	return b.String()
+	return buf.String()
 }
 
 // Return the next spot where is possible to put a number
-func nextEmpty(board [][]int) []int {
-	for i := range board {
-		for j := range board[i] {
-			if board[i][j] == 0 {
+func (b *board) nextEmpty() []int {
+	for i := 0; i < boardSize; i++ {
+		for j := 0; j < boardSize; j++ {
+			if b.get(i, j) == 0 {
 				return []int{i, j}
 			}
 		}
@@ -84,23 +94,23 @@ func nextEmpty(board [][]int) []int {
 }
 
 // Return true if the number n can be put in the board at specific spot
-func canPut(board [][]int, spot []int, n int) bool {
+func (b *board) canPut(spot []int, n int) bool {
 	x, y := spot[0], spot[1]
 	for i := 0; i < boardSize; i++ {
 		// test line
-		if board[i][y] == n {
+		if b.get(i, y) == n {
 			return false
 		}
 		// test column
-		if board[x][i] == n {
+		if b.get(x, i) == n {
 			return false
 		}
 	}
 	// test square
-	a, b := x-(x%3), y-(y%3)
-	for i := a; i < a+3; i++ {
-		for j := b; j < b+3; j++ {
-			if board[i][j] == n {
+	limx, limy := x-(x%3), y-(y%3)
+	for i := limx; i < limx+3; i++ {
+		for j := limy; j < limy+3; j++ {
+			if b.get(i, j) == n {
 				return false
 			}
 		}
@@ -110,25 +120,23 @@ func canPut(board [][]int, spot []int, n int) bool {
 }
 
 // Solve using backtracking
-func solve(board [][]int) [][]int {
-	spot := nextEmpty(board)
+func (b *board) solve() {
+	spot := b.nextEmpty()
 	if spot == nil {
-		return board
+		return
 	}
 	x, y := spot[0], spot[1]
 	for i := 1; i < 10; i++ {
-		if canPut(board, spot, i) {
-			board[x][y] = i
-			newBoard := solve(board)
-			if nextEmpty(newBoard) == nil {
-				// solution found
-				return newBoard
+		if b.canPut(spot, i) {
+			b.set(x, y, i)
+			b.solve()
+			if b.nextEmpty() == nil {
+				return
 			}
 		}
 	}
 	// solution not found, backtrack
-	board[x][y] = 0
-	return board
+	b.set(x, y, 0)
 }
 
 func check(err error) {
@@ -147,7 +155,8 @@ func processBatch(input io.Reader, output io.Writer) {
 	before := time.Now()
 	for _, line := range lines {
 		sudoku := fromStr(line)
-		solvedOutput.WriteString(toStr(solve(sudoku)))
+		sudoku.solve()
+		solvedOutput.WriteString(sudoku.String())
 		solvedOutput.WriteString("\n")
 		loadBar(count, total, 20, 50)
 		count++

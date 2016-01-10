@@ -19,47 +19,11 @@ const (
 )
 
 func TestSolve(t *testing.T) {
-	resolved := solve(fromStr(sudokuExample))
+	sudoku := fromStr(sudokuExample)
+	sudoku.solve()
 
-	if toStr(resolved) != expected {
-		t.Errorf("Resolved was %s but should be %s", toStr(resolved), expected)
-	}
-}
-
-func TestNextEmpty(t *testing.T) {
-	board := fromStr(sudokuExample)
-	spot := nextEmpty(board)
-	if spot == nil {
-		t.Error("spot should'nt be nil :(")
-	}
-	if spot[0] != 0 && spot[1] != 1 {
-		t.Errorf("next empty spot should be at row %d and column %d",
-			spot[0], spot[1])
-	}
-}
-
-func TestCanPut(t *testing.T) {
-	board := fromStr("000000000000000000000000000000000000000000000000000000000000000000000000000000000")
-	if !canPut(board, []int{0, 0}, 1) {
-		t.Error("can put with empty board not working")
-	}
-
-	board[0][0] = 1
-	if canPut(board, []int{0, 1}, 1) {
-		t.Error("same row number")
-	}
-
-	board[0][0] = 0
-	board[1][0] = 1
-	if canPut(board, []int{0, 0}, 1) {
-		t.Error("same column number")
-	}
-
-	board[0][0] = 0
-	board[1][0] = 0
-	board[1][1] = 1
-	if canPut(board, []int{0, 0}, 1) {
-		t.Error("same square number")
+	if sudoku.String() != expected {
+		t.Errorf("Resolved was %s but should be %s", sudoku, expected)
 	}
 }
 
