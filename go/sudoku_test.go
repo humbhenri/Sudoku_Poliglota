@@ -1,22 +1,76 @@
 package main
 
 import "testing"
+import "strings"
+import "bytes"
 
-const sudokuExample = "2000060000075030048090100000300000300010009000008000001020570080730000090000004"
+const (
+	sudokuExample = "807000003602080000000200900040005001000798000200100070004003000000040108300000506"
+	expected      = `8 9 7 4 5 1 6 2 3 
+6 3 2 9 8 7 4 1 5 
+4 1 5 2 3 6 9 8 7 
+7 4 9 3 2 5 8 6 1 
+1 6 3 7 9 8 2 5 4 
+2 5 8 1 6 4 3 7 9 
+5 8 4 6 1 3 7 9 2 
+9 7 6 5 4 2 1 3 8 
+3 2 1 8 7 9 5 4 6 
+`
+)
 
 func TestSolve(t *testing.T) {
-	resolved := solve(FromStr(sudokuExample))
-	expected := `2 7 3 4 8 1 9 6 5 
-9 1 6 2 7 5 4 3 8 
-5 4 8 6 9 3 1 2 7 
-8 5 9 3 4 7 6 1 2 
-3 6 7 5 1 2 8 4 9 
-1 2 4 9 6 8 7 5 3 
-4 3 1 8 2 9 5 7 6 
-6 8 5 7 3 4 2 9 1 
-7 9 2 1 5 6 3 8 4 
-`
-	if ToStr(resolved) != expected {
-		t.Errorf("Resolved was %s but should be %s", ToStr(resolved), expected)
+	resolved := solve(fromStr(sudokuExample))
+
+	if toStr(resolved) != expected {
+		t.Errorf("Resolved was %s but should be %s", toStr(resolved), expected)
 	}
+}
+
+func TestNextEmpty(t *testing.T) {
+	board := fromStr(sudokuExample)
+	spot := nextEmpty(board)
+	if spot == nil {
+		t.Error("spot should'nt be nil :(")
+	}
+	if spot[0] != 0 && spot[1] != 1 {
+		t.Errorf("next empty spot should be at row %d and column %d",
+			spot[0], spot[1])
+	}
+}
+
+func TestCanPut(t *testing.T) {
+	board := fromStr("000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+	if !canPut(board, []int{0, 0}, 1) {
+		t.Error("can put with empty board not working")
+	}
+
+	board[0][0] = 1
+	if canPut(board, []int{0, 1}, 1) {
+		t.Error("same row number")
+	}
+
+	board[0][0] = 0
+	board[1][0] = 1
+	if canPut(board, []int{0, 0}, 1) {
+		t.Error("same column number")
+	}
+
+	board[0][0] = 0
+	board[1][0] = 0
+	board[1][1] = 1
+	if canPut(board, []int{0, 0}, 1) {
+		t.Error("same square number")
+	}
+}
+
+func TestProcessBatch(t *testing.T) {
+	input := bytes.NewBufferString(sudokuExample)
+	var output bytes.Buffer
+
+	processBatch(input, &output)
+
+	if strings.TrimSpace(output.String()) != strings.TrimSpace(expected) {
+		t.Errorf("output should be %s but was %s", expected, output.String())
+	}
+
 }

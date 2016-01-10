@@ -2,26 +2,29 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
-const BOARD_SIZE = 9 // rows and column size
+const boardSize = 9 // rows and column size
 
-// Progress bar
-func LoadBar(step int, totalSteps int, resolution int, width int) {
+func loadBar(step int, totalSteps int, resolution int, width int) {
 	if totalSteps/resolution == 0 {
 		return
 	}
 	if step%(totalSteps/resolution) != 0 {
 		return
 	}
-	var ratio float64 = float64(step) / float64(totalSteps)
-	var count int = int(ratio * float64(width))
+	var ratio = float64(step) / float64(totalSteps)
+	var count = int(ratio * float64(width))
 	os.Stdout.Write([]byte(fmt.Sprintf("%3d%% [", int(ratio*100))))
 	for i := 0; i < count; i++ {
 		os.Stdout.Write([]byte("="))
@@ -34,21 +37,21 @@ func LoadBar(step int, totalSteps int, resolution int, width int) {
 }
 
 // Build a slice of slices to represent the board from a string
-func FromStr(boardRepr string) [][]int {
-	board := make([][]int, BOARD_SIZE)
+func fromStr(boardRepr string) [][]int {
+	board := make([][]int, boardSize)
 	for i := range board {
-		board[i] = make([]int, BOARD_SIZE)
+		board[i] = make([]int, boardSize)
 	}
 
 	x, y := 0, 0
 	for i := range boardRepr {
 		if boardRepr[i] >= '0' && boardRepr[i] <= '9' {
 			board[x][y] = int(boardRepr[i]) - 48
-			if y == BOARD_SIZE-1 {
-				x += 1 % BOARD_SIZE
+			if y == boardSize-1 {
+				x += 1 % boardSize
 				y = 0
 			} else {
-				y += 1 % BOARD_SIZE
+				y += 1 % boardSize
 			}
 		}
 	}
@@ -57,7 +60,7 @@ func FromStr(boardRepr string) [][]int {
 }
 
 // Board to string
-func ToStr(board [][]int) string {
+func toStr(board [][]int) string {
 	var b bytes.Buffer
 	for i := range board {
 		for j := range board[i] {
@@ -83,7 +86,7 @@ func nextEmpty(board [][]int) []int {
 // Return true if the number n can be put in the board at specific spot
 func canPut(board [][]int, spot []int, n int) bool {
 	x, y := spot[0], spot[1]
-	for i := range board {
+	for i := 0; i < boardSize; i++ {
 		// test line
 		if board[i][y] == n {
 			return false
@@ -128,32 +131,41 @@ func solve(board [][]int) [][]int {
 	return board
 }
 
-func processBatch(file string) {
-	data, err := ioutil.ReadFile(file)
+func check(err error) {
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+}
+
+func processBatch(input io.Reader, output io.Writer) {
+	data, err := ioutil.ReadAll(input)
+	check(err)
 	var solvedOutput bytes.Buffer
 	lines := strings.Split(string(data), "\n")
 	total := len(lines)
 	count := 0
 	before := time.Now()
 	for _, line := range lines {
-		sudoku := FromStr(line)
-		solvedOutput.WriteString(ToStr(solve(sudoku)))
+		sudoku := fromStr(line)
+		solvedOutput.WriteString(toStr(solve(sudoku)))
 		solvedOutput.WriteString("\n")
-		LoadBar(count, total, 20, 50)
+		loadBar(count, total, 20, 50)
 		count++
 	}
 	diff := time.Now().Sub(before)
 	fmt.Printf("-- Solved %d sudokus. Elapsed time: %f seconds\n", count, diff.Seconds())
-	err = ioutil.WriteFile("solved_"+file, solvedOutput.Bytes(), 0644)
-	if err != nil {
-		panic(err)
-	}
+	_, err = output.Write(solvedOutput.Bytes())
+	check(err)
 }
 
 func main() {
-	file := os.Args[1]
-	processBatch(file)
+	inputFile, err := os.Open(os.Args[1])
+	check(err)
+	input := bufio.NewReader(inputFile)
+	outputFile, err := os.Create("solved_" + filepath.Base(inputFile.Name()))
+	check(err)
+	output := bufio.NewWriter(outputFile)
+	defer inputFile.Close()
+	defer outputFile.Close()
+	processBatch(input, output)
 }
