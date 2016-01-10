@@ -148,7 +148,6 @@ func check(err error) {
 func processBatch(input io.Reader, output io.Writer) {
 	data, err := ioutil.ReadAll(input)
 	check(err)
-	var solvedOutput bytes.Buffer
 	lines := strings.Split(string(data), "\n")
 	total := len(lines)
 	count := 0
@@ -156,15 +155,13 @@ func processBatch(input io.Reader, output io.Writer) {
 	for _, line := range lines {
 		sudoku := fromStr(line)
 		sudoku.solve()
-		solvedOutput.WriteString(sudoku.String())
-		solvedOutput.WriteString("\n")
+		_, err := output.Write([]byte(sudoku.String() + "\n"))
+		check(err)
 		loadBar(count, total, 20, 50)
 		count++
 	}
 	diff := time.Now().Sub(before)
 	fmt.Printf("-- Solved %d sudokus. Elapsed time: %f seconds\n", count, diff.Seconds())
-	_, err = output.Write(solvedOutput.Bytes())
-	check(err)
 }
 
 func main() {
