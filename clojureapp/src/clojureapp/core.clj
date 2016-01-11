@@ -1,4 +1,6 @@
-;(:use [clojure.string :only [join]])
+(ns clojureapp.core
+  (:gen-class))
+
 (use '[clojure.string :only [join]])
 (import '[java.io File])
 
