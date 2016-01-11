@@ -1,21 +1,19 @@
 package github.humbhenri.sudoku;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Scanner;
 
 public class Sudoku {
-	
+
 	static class Spot {
 		int row;
+
 		int col;
+
 		Spot(int row, int col) {
 			this.row = row;
 			this.col = col;
@@ -89,11 +87,10 @@ public class Sudoku {
 			}
 		}
 
-        return true;
-    }
-    
+		return true;
+	}
 
-    public static final int BOARD_SIZE = 9;
+	public static final int BOARD_SIZE = 9;
 
 	@Override
 	public String toString() {
@@ -107,7 +104,6 @@ public class Sudoku {
 		out.append("\n");
 		return out.toString();
 	}
-	
 
 	public static void main(String[] args) throws IOException {
 		if (args.length == 0) {
@@ -116,13 +112,13 @@ public class Sudoku {
 		}
 		long before = System.currentTimeMillis();
 		Path input = Paths.get("", args[0]);
-		Path outputFile = Paths.get(input.getParent().toString(), "solved_" + input.getFileName());
+		Path output = Paths.get(input.getParent().toString(), "solved_" + input.getFileName());
 		List<String> lines = Files.readAllLines(input, Charset.defaultCharset());
 		ProgressBar bar = new ProgressBar(0, lines.size(), 100, 100);
 		for (String line: lines) {
 			Sudoku sudoku = Sudoku.fromString(line);
 			sudoku.solve();
-			Files.write(outputFile, sudoku.toString().getBytes());
+			Files.write(output, sudoku.toString().getBytes());
 			bar.advance();
 		}
 		long duration = System.currentTimeMillis() - before;
@@ -132,28 +128,35 @@ public class Sudoku {
 }
 
 class ProgressBar {
-    private int totalSteps;
-    private int step;
-    private int resolution;
-    private int width;
+	private int totalSteps;
 
-    public ProgressBar(int step, int totalSteps, int resolution, int width) {
-        this.step = step;
-        this.totalSteps = totalSteps;
-        this.resolution = resolution;
-        this.width = width;
-    }
+	private int step;
 
-    public void advance() {
-        step++;
-        if (totalSteps/resolution == 0) return;
-        if (step % (totalSteps/resolution) != 0) return;
-        float ratio = step/(float)totalSteps;
-        int count = (int) (ratio * width);
-        System.out.printf("%3d%% [", (int) (ratio * 100));
-        for (int i=0; i<count; i++) System.out.print("=");
-        for (int i=count; i<width; i++) System.out.print(" ");
-        System.out.print( "]\r");
-        System.out.flush();
-    }
+	private int resolution;
+
+	private int width;
+
+	public ProgressBar(int step, int totalSteps, int resolution, int width) {
+		this.step = step;
+		this.totalSteps = totalSteps;
+		this.resolution = resolution;
+		this.width = width;
+	}
+
+	public void advance() {
+		step++;
+		if (totalSteps / resolution == 0)
+			return;
+		if (step % (totalSteps / resolution) != 0)
+			return;
+		float ratio = step / (float) totalSteps;
+		int count = (int) (ratio * width);
+		System.out.printf("%3d%% [", (int) (ratio * 100));
+		for (int i = 0; i < count; i++)
+			System.out.print("=");
+		for (int i = count; i < width; i++)
+			System.out.print(" ");
+		System.out.print("]\r");
+		System.out.flush();
+	}
 }
