@@ -171,3 +171,7 @@ solved_input_small.txt
 *.o
 
 sudoku.hi
+/go/go.test.exe
+/java/.gradle/2.10/taskArtifacts/cache.properties
+/sudoku.exe
+/java/.gradle/2.10/taskArtifacts/cache.properties.lock
