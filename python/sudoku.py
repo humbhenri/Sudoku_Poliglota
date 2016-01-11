@@ -14,32 +14,32 @@ def load_bar(step, total_steps, resolution, width):
         return
     ratio = step/float(total_steps)
     count = int(ratio * width)
-    print '%3d%% [' % int(ratio*100) ,
-    for x in xrange(0, count):
+    print('%3d%% ['.format(int(ratio*100)))
+    for x in range(0, count):
         sys.stdout.write('=')
-    for x in xrange(count, width):
+    for x in range(count, width):
         sys.stdout.write(' ')
     sys.stdout.write(']\r')
     sys.stdout.flush()
 
 def next_empty(sudoku):
-    for i in xrange(0, len(sudoku)):
-        for j in xrange(0, len(sudoku[i])):
+    for i in range(0, len(sudoku)):
+        for j in range(0, len(sudoku[i])):
             if sudoku[i][j] == 0:
                 return i,j
     return None
 
 
 def can_put(sudoku, x, y, val):
-    for i in xrange(0, len(sudoku)):
+    for i in range(0, len(sudoku)):
         if sudoku[i][y] == val:
             return False
         if sudoku[x][i] == val:
             return False
     sq_x = x-(x%3)
     sq_y = y-(y%3)
-    for i in xrange(sq_x, sq_x+3):
-        for j in xrange(sq_y, sq_y+3):
+    for i in range(sq_x, sq_x+3):
+        for j in range(sq_y, sq_y+3):
             if sudoku[i][j] == val:
                 return False
     return True
@@ -50,7 +50,7 @@ def solve(sudoku):
     if spot is None:
         return sudoku
     x, y = spot
-    for i in xrange(1, 10):
+    for i in range(1, 10):
         if can_put(sudoku, x, y, i):
             sudoku[x][y] = i
             new_sudoku = solve(sudoku)
@@ -66,13 +66,13 @@ def to_str(sudoku):
 
 
 def from_str(data):
-    rows = [data[i:i+BOARD_SIZE] for i in xrange(0, len(data), BOARD_SIZE)]
-    return [map(int,list(row)) for row in rows]
+    rows = [data[i:i+BOARD_SIZE] for i in range(0, len(data), BOARD_SIZE)]
+    return [list(map(int,list(row))) for row in rows]
 
 
 def process(input, output):
     data = input.read()
-    print 'data is ' + data
+    print('data is ' + data)
 
     # solve all sudokus
     before = time.time()
@@ -89,10 +89,10 @@ def process(input, output):
     after = time.time()
 
     # write solutions to file
-    output.write(unicode('\n\n'.join(result)))
+    output.write('\n\n'.join(result))
 
     # present results
-    print '--Elapsed %f ms' % ((after-before)*1000)
+    print('--Elapsed %f ms' % ((after-before)*1000))
 
 if __name__ == '__main__':
     try:
@@ -101,5 +101,5 @@ if __name__ == '__main__':
             with io.open('solved_' + os.path.basename(filename), 'w') as output:
                 process(input, output)
     except IndexError:
-        print 'Insert file input'
+        print('Insert file input')
         sys.exit(1)

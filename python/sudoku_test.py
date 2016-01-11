@@ -1,5 +1,5 @@
 import unittest
-from sudoku import *
+from .sudoku import *
 
 class TestSudoku(unittest.TestCase):
     def test_from_str(self):
