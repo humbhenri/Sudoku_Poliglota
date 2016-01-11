@@ -20,39 +20,48 @@ public class Sudoku {
 		}
 	}
 
-	/**
-	 * The array is modified in place
-	 * 
-	 * @param sudoku
-	 */
-	public static int[][] solve(int[][] sudoku) {
-		Spot spot = nextEmptySpot(sudoku);
+	private int[][] board;
+
+	public static Sudoku fromString(String sudokuOneLine) {
+		int[][] board = new int[BOARD_SIZE][BOARD_SIZE];
+		for (int row = 0; row < BOARD_SIZE; row++) {
+			for (int col = 0; col < BOARD_SIZE; col++) {
+				int index = row * BOARD_SIZE + col;
+				board[row][col] = Character.getNumericValue(sudokuOneLine.charAt(index));
+			}
+		}
+		Sudoku s = new Sudoku();
+		s.board = board;
+		return s;
+	}
+
+	public void solve() {
+		Spot spot = nextEmptySpot();
 		if (spot == null) {
-			return sudoku;
+			return;
 		}
 
 		for (int tryValue = 1; tryValue < 10; tryValue++) {
-			if (canPut(sudoku, spot, tryValue)) {
-				put(sudoku, spot, tryValue);
-				int[][] newSudoku = solve(sudoku);
-				if (nextEmptySpot(newSudoku) == null) {
-					return newSudoku;
+			if (canPut(spot, tryValue)) {
+				put(spot, tryValue);
+				solve();
+				if (nextEmptySpot() == null) {
+					return;
 				}
 			}
 		}
 
-		put(sudoku, spot, 0); // solution not found, backtrack
-		return sudoku;
+		put(spot, 0); // solution not found, backtrack
 	}
 
-	private static void put(int[][] sudoku, Spot spot, int value) {
-		sudoku[spot.row][spot.col] = value;
+	private void put(Spot spot, int value) {
+		board[spot.row][spot.col] = value;
 	}
 
-	private static Spot nextEmptySpot(int[][] sudoku) {
-		for (int i = 0; i < sudoku.length; i++) {
-			for (int j = 0; j < sudoku[i].length; j++) {
-				if (sudoku[i][j] == 0) {
+	private Spot nextEmptySpot() {
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board[i].length; j++) {
+				if (board[i][j] == 0) {
 					return new Spot(i, j);
 				}
 			}
@@ -60,16 +69,11 @@ public class Sudoku {
 		return null;
 	}
 
-	private static boolean canPut(int[][] sudoku, Spot spot, int val) {
+	private boolean canPut(Spot spot, int val) {
 		int x = spot.row;
 		int y = spot.col;
-		for (int i = 0; i < sudoku.length; i++) {
-			// test row
-			if (sudoku[i][y] == val) {
-				return false;
-			}
-			// test column
-			if (sudoku[x][i] == val) {
+		for (int i = 0; i < board.length; i++) {
+			if (board[i][y] == val || board[x][i] == val) {
 				return false;
 			}
 		}
@@ -78,7 +82,7 @@ public class Sudoku {
 		int b = y - (y % 3);
 		for (int i = a; i < a + 3; i++) {
 			for (int j = b; j < b + 3; j++) {
-				if (sudoku[i][j] == val) {
+				if (board[i][j] == val) {
 					return false;
 				}
 			}
@@ -89,18 +93,8 @@ public class Sudoku {
 
 	public static final int BOARD_SIZE = 9;
 
-	public static int[][] fromString(String data) {
-		int[][] board = new int[BOARD_SIZE][BOARD_SIZE];
-		for (int row = 0; row < BOARD_SIZE; row++) {
-			for (int col = 0; col < BOARD_SIZE; col++) {
-				int index = row * BOARD_SIZE + col;
-				board[row][col] = Character.getNumericValue(data.charAt(index));
-			}
-		}
-		return board;
-	}
-
-	public static String toString(int[][] board) {
+	@Override
+	public String toString() {
 		StringBuilder out = new StringBuilder();
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[i].length; j++) {
@@ -113,33 +107,23 @@ public class Sudoku {
 	}
 
 	public static void main(String[] args) throws IOException {
-		checkRequiredInputFile(args);
-		long before = System.currentTimeMillis();
-		Path input = Paths.get("", args[0]);
-		List<String> lines = Files.readAllLines(input, Charset.defaultCharset());
-		StringBuilder output = solveAllSudokus(lines);
-		long duration = System.currentTimeMillis() - before;
-		Path outputFile = Paths.get(input.getParent().toString(), "solved_" + input.getFileName());
-		Files.write(outputFile, output.toString().getBytes());
-		System.out.println("-- Elapsed time: " + duration + " ms.");
-	}
-
-	private static void checkRequiredInputFile(String[] args) {
 		if (args.length == 0) {
 			System.out.println("input required, please specify a file name with sudokus to solve.");
 			System.exit(1);
 		}
-	}
-
-	private static StringBuilder solveAllSudokus(List<String> lines) {
-		StringBuilder output = new StringBuilder();
+		long before = System.currentTimeMillis();
+		Path input = Paths.get("", args[0]);
+		Path outputFile = Paths.get(input.getParent().toString(), "solved_" + input.getFileName());
+		List<String> lines = Files.readAllLines(input, Charset.defaultCharset());
 		ProgressBar bar = new ProgressBar(0, lines.size(), 100, 100);
 		for (String line: lines) {
-			int[][] sudoku = fromString(line);
-			output.append(toString(solve(sudoku)));
+			Sudoku sudoku = Sudoku.fromString(line);
+			sudoku.solve();
+			Files.write(outputFile, sudoku.toString().getBytes());
 			bar.advance();
 		}
-		return output;
+		long duration = System.currentTimeMillis() - before;
+		System.out.println("-- Elapsed time: " + duration + " ms.");
 	}
 }
 
