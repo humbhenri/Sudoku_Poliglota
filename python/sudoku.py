@@ -64,19 +64,16 @@ def solve(sudoku):
 
 
 def to_str(sudoku):
-    return '\n'.join([' '.join(map(str, row)) for row in sudoku])
+    return '\n'.join(' '.join(map(str, row)) for row in sudoku)
 
 
 def from_str(data):
-    rows = [data[i:i + BOARD_SIZE] for i in range(0, len(data), BOARD_SIZE)]
+    rows = (data[i:i + BOARD_SIZE] for i in range(0, len(data), BOARD_SIZE))
     return [list(map(int, row)) for row in rows]
 
 
 def process(input, output):
     data = input.read()
-    print('data is ' + data)
-
-    # solve all sudokus
     before = time.time()
     sudokus = data.splitlines()
     total_sudokus = len(sudokus)
@@ -86,11 +83,9 @@ def process(input, output):
         sudoku = solve(sudoku)
         output.write(to_str(sudoku) + '\n')
         solved_sudokus += 1
-        load_bar(solved_sudokus, total_sudokus, 100, 50)
+        load_bar(step=solved_sudokus, total_steps=total_sudokus, resolution=100, width=50)
     after = time.time()
-
-    # present results
-    print('--Elapsed %f ms' % ((after - before) * 1000))
+    print('--Elapsed {:.2f} ms'.format((after - before) * 1000))
 
 
 if __name__ == '__main__':

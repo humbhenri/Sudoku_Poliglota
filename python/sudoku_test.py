@@ -1,5 +1,5 @@
 import unittest
-from .sudoku import *
+from sudoku import *
 from copy import deepcopy
 
 SUDOKU_SAMPLE = [
