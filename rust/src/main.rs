@@ -20,6 +20,50 @@ impl Sudoku {
     }
     Sudoku(board)
     }
+
+    fn can_put(&self, row: usize, column: usize, val: u32) -> bool {
+        for x in 0..ROW_SIZE {
+            if self.0[row][x] == val || self.0[x][column] == val {
+                return false;
+            }
+        }
+        let a = row-(row%3);
+        let b = column-(column%3);
+        for x in a..a+3 {
+            for y in b..b+3 {
+                if self.0[x][y] == val { return false; }
+            }
+        }
+        true
+    }
+
+    fn next_empty_spot(&self) -> Option<(usize, usize)> {
+        for row in 0..ROW_SIZE {
+            for column in 0..ROW_SIZE {
+                if self.0[row][column] == 0 {
+                    return Some((row, column));
+                }
+            }
+        }
+        None
+    }
+
+    fn solve(&mut self) {
+        let (row, column) = match self.next_empty_spot() {
+            Some(m) => m,
+            None => return,
+        };
+        for val in 1..9 {
+            if self.can_put(row, column, val) {
+                self.0[row][column] = val;
+                self.solve();
+                if self.next_empty_spot().is_none() {
+                    return;
+                }
+            }
+        }
+        self.0[row][column] = 0;
+    }
 }
 
 impl fmt::Display for Sudoku {
@@ -36,8 +80,10 @@ impl fmt::Display for Sudoku {
 
 fn main() {
     let sudoku_example = "200000060000075030048090100000300000300010009000008000001020570080730000090000004";
-    let board = Sudoku::from_str(sudoku_example);
-    println!("{}", board)
+    let mut board = Sudoku::from_str(sudoku_example);
+    board.solve();
+    println!("{}", board);
+    for i in 1..4 { println!("{}", i); }
 }
 
 // #[cfg(test)]
