@@ -3,6 +3,3 @@
 name = "sudoku"
 version = "0.0.1"
 authors = [ "Humberto Pinheiro <humbhenri@gmail.com>" ]
-
-[dependencies]
-itertools = "0.4"

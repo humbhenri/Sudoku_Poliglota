@@ -3,7 +3,7 @@ use std::fmt;
 const ROW_SIZE: usize = 9;
 
 #[derive(Debug)]
-struct Sudoku([[u32; ROW_SIZE]; ROW_SIZE]);
+pub struct Sudoku([[u32; ROW_SIZE]; ROW_SIZE]);
 
 impl Sudoku {
     fn from_str(sudoku: &str) -> Sudoku {
@@ -53,6 +53,7 @@ impl Sudoku {
             Some(m) => m,
             None => return,
         };
+        println!("trying {}{}", row, column);
         for val in 1..9 {
             if self.can_put(row, column, val) {
                 self.0[row][column] = val;
@@ -79,20 +80,29 @@ impl fmt::Display for Sudoku {
 }
 
 fn main() {
-    let sudoku_example = "200000060000075030048090100000300000300010009000008000001020570080730000090000004";
+    let sudoku_example = "807000003602080000000200900040005001000798000200100070004003000000040108300000506";
     let mut board = Sudoku::from_str(sudoku_example);
     board.solve();
     println!("{}", board);
-    for i in 1..4 { println!("{}", i); }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[test]
-//     fn read_sudoku_string_to_struct() {
-//         let sudoku_example = "200000060000075030048090100000300000300010009000008000001020570080730000090000004";
-//         println!("{:?}", board)
-//     }
-// }
+    #[test]
+    fn read_sudoku_string_to_struct() {
+        let sudoku_example = "200000060000075030048090100000300000300010009000008000001020570080730000090000004";
+        assert_eq!("2 0 0 0 0 0 0 6 0
+0 0 0 0 7 5 0 3 0
+0 4 8 0 9 0 1 0 0
+0 0 0 3 0 0 0 0 0
+3 0 0 0 1 0 0 0 9
+0 0 0 0 0 8 0 0 0
+0 0 1 0 2 0 5 7 0
+0 8 0 7 3 0 0 0 0
+0 9 0 0 0 0 0 0 4
+",  Sudoku::from_str(sudoku_example).to_string());
+    }
+
+}
