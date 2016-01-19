@@ -1,4 +1,11 @@
 use std::fmt;
+use std::io::Write;
+use std::io::Read;
+use std::io::BufReader;
+use std::io::BufRead;
+use std::io::BufWriter;
+use std::fs::File;
+use std::env;
 
 const ROW_SIZE: usize = 9;
 
@@ -6,7 +13,7 @@ const ROW_SIZE: usize = 9;
 pub struct Sudoku([[u32; ROW_SIZE]; ROW_SIZE]);
 
 impl Sudoku {
-    fn from_str(sudoku: &str) -> Sudoku {
+    fn new(sudoku: &str) -> Self {
         let mut board = [[0; ROW_SIZE]; ROW_SIZE];
         let mut row = 0;
         let mut col = 0;
@@ -78,11 +85,23 @@ impl fmt::Display for Sudoku {
     }
 }
 
+pub fn process<R, W>(input: R, output: &mut W) where W: Write, R: Read {
+    let reader = BufReader::new(input);
+    let mut writer = BufWriter::new(output);
+    for line in reader.lines() {
+        let mut sudoku = Sudoku::new(&line.unwrap());
+        sudoku.solve();
+        write!(writer, "{}\n", sudoku).unwrap();
+    }
+}
+
 fn main() {
-    let sudoku_example = "807000003602080000000200900040005001000798000200100070004003000000040108300000506";
-    let mut board = Sudoku::from_str(sudoku_example);
-    board.solve();
-    println!("{}", board);
+    let filename = env::args().nth(1).expect("input file name is necessary");
+    let input = File::open(&filename).ok().expect("file not found");
+    let mut output_name = String::from("solved_");
+    output_name.push_str(&filename);
+    let mut output = File::create(output_name).ok().expect("cannot create output file");
+    process(input, &mut output);
 }
 
 #[cfg(test)]
@@ -90,6 +109,16 @@ mod tests {
     use super::*;
 
     const SUDOKU_EXAMPLE: & 'static str = "200000060000075030048090100000300000300010009000008000001020570080730000090000004";
+    const SUDOKU_SOLUTION: & 'static str = "2 7 3 4 8 1 9 6 5
+9 1 6 2 7 5 4 3 8
+5 4 8 6 9 3 1 2 7
+8 5 9 3 4 7 6 1 2
+3 6 7 5 1 2 8 4 9
+1 2 4 9 6 8 7 5 3
+4 3 1 8 2 9 5 7 6
+6 8 5 7 3 4 2 9 1
+7 9 2 1 5 6 3 8 4
+";
 
     #[test]
     fn test_create_sudoku() {
@@ -102,34 +131,34 @@ mod tests {
 0 0 1 0 2 0 5 7 0
 0 8 0 7 3 0 0 0 0
 0 9 0 0 0 0 0 0 4
-",  Sudoku::from_str(SUDOKU_EXAMPLE).to_string());
+",  Sudoku::new(SUDOKU_EXAMPLE).to_string());
     }
 
     #[test]
     fn test_next_empty() {
-        let board = Sudoku::from_str(SUDOKU_EXAMPLE);
+        let board = Sudoku::new(SUDOKU_EXAMPLE);
         assert_eq!(Some((0, 1)), board.next_empty_spot());
     }
 
     #[test]
     fn test_can_put() {
-        let board = Sudoku::from_str(SUDOKU_EXAMPLE);
+        let board = Sudoku::new(SUDOKU_EXAMPLE);
         assert!(board.can_put(0, 1, 7));
     }
 
     #[test]
     fn test_solve() {
-        let mut board = Sudoku::from_str(SUDOKU_EXAMPLE);
+        let mut board = Sudoku::new(SUDOKU_EXAMPLE);
         board.solve();
-        assert_eq!("2 7 3 4 8 1 9 6 5
-9 1 6 2 7 5 4 3 8
-5 4 8 6 9 3 1 2 7
-8 5 9 3 4 7 6 1 2
-3 6 7 5 1 2 8 4 9
-1 2 4 9 6 8 7 5 3
-4 3 1 8 2 9 5 7 6
-6 8 5 7 3 4 2 9 1
-7 9 2 1 5 6 3 8 4
-", board.to_string());
+        assert_eq!(SUDOKU_SOLUTION, board.to_string());
     }
+
+     #[test]
+     fn test_process() {
+         use std::io::Cursor;
+         let input = Cursor::new(SUDOKU_EXAMPLE);
+         let mut output = Cursor::new(Vec::<u8>::new());
+         process(input, &mut output);
+         assert_eq!(SUDOKU_SOLUTION.trim(), String::from_utf8(output.into_inner()).unwrap().trim());
+     }
 }
