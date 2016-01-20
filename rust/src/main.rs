@@ -6,6 +6,7 @@ use std::io::BufRead;
 use std::io::BufWriter;
 use std::fs::File;
 use std::env;
+use std::path::Path;
 
 const ROW_SIZE: usize = 9;
 
@@ -99,7 +100,7 @@ fn main() {
     let filename = env::args().nth(1).expect("input file name is necessary");
     let input = File::open(&filename).ok().expect("file not found");
     let mut output_name = String::from("solved_");
-    output_name.push_str(&filename);
+    output_name.push_str(Path::new(&filename).file_name().and_then(|x| x.to_str()).unwrap());
     let mut output = File::create(output_name).ok().expect("cannot create output file");
     process(input, &mut output);
 }
