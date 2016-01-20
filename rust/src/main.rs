@@ -1,12 +1,8 @@
 use std::fmt;
-use std::io::Write;
-use std::io::Read;
-use std::io::BufReader;
-use std::io::BufRead;
-use std::io::BufWriter;
 use std::fs::File;
 use std::env;
 use std::path::Path;
+use std::io::{self, Write, Read, BufReader, BufRead, BufWriter};
 
 const ROW_SIZE: usize = 9;
 
@@ -85,15 +81,47 @@ impl fmt::Display for Sudoku {
         write!(f, "{}", s)
     }
 }
+// def load_bar(step, total_steps, resolution, width):
+//     if total_steps / resolution == 0:
+//         return
+//     if step % (total_steps / resolution) != 0:
+//         return
+//     ratio = step / float(total_steps)
+//     count = int(ratio * width)
+//     print('%3d%% ['.format(int(ratio * 100)))
+//     for x in range(0, count):
+//         sys.stdout.write('=')
+//     for x in range(count, width):
+//         sys.stdout.write(' ')
+//     sys.stdout.write(']\r')
+//     sys.stdout.flush()
+
+pub fn progress_bar(step: usize, total_steps: usize, resolution: usize, width: usize) {
+    if total_steps / resolution == 0 {
+        return
+    }
+    let ratio = step / total_steps;
+    let count = ratio * width;
+    let fill = String::from_utf8(vec![b'='; count as usize]).unwrap();
+    println!("[{fill:<width$}]", fill=fill, width=width);
+    println!("\r");
+    io::stdout().flush().unwrap();
+}
 
 pub fn process<R, W>(input: R, output: &mut W) where W: Write, R: Read {
     let reader = BufReader::new(input);
     let mut writer = BufWriter::new(output);
-    for line in reader.lines() {
-        let mut sudoku = Sudoku::new(&line.unwrap());
+    let lines = reader.lines().collect::<Vec<_>>();
+    let total = lines.len();
+    let mut count = 1;
+    for line in lines.iter() {
+        progress_bar(count, total, 100, 100);
+        let mut sudoku = Sudoku::new(&line.as_ref().unwrap());
         sudoku.solve();
         write!(writer, "{}\n", sudoku).unwrap();
+        count += 1;
     }
+    println!("\n");
 }
 
 fn main() {
