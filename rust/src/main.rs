@@ -81,31 +81,16 @@ impl fmt::Display for Sudoku {
         write!(f, "{}", s)
     }
 }
-// def load_bar(step, total_steps, resolution, width):
-//     if total_steps / resolution == 0:
-//         return
-//     if step % (total_steps / resolution) != 0:
-//         return
-//     ratio = step / float(total_steps)
-//     count = int(ratio * width)
-//     print('%3d%% ['.format(int(ratio * 100)))
-//     for x in range(0, count):
-//         sys.stdout.write('=')
-//     for x in range(count, width):
-//         sys.stdout.write(' ')
-//     sys.stdout.write(']\r')
-//     sys.stdout.flush()
 
 pub fn progress_bar(step: usize, total_steps: usize, resolution: usize, width: usize) {
     if total_steps / resolution == 0 {
         return
     }
-    let ratio = step / total_steps;
-    let count = ratio * width;
+    let ratio: f32 = step as f32 / total_steps as f32;
+    let count: f32 = ratio * width as f32;
     let fill = String::from_utf8(vec![b'='; count as usize]).unwrap();
-    println!("[{fill:<width$}]", fill=fill, width=width);
-    println!("\r");
-    io::stdout().flush().unwrap();
+    print!("\r{ratio:.2}% [{fill:<width$}]", ratio=ratio * 100.0, fill=fill, width=width);
+    io::stdout().flush().ok().expect("could not flush");
 }
 
 pub fn process<R, W>(input: R, output: &mut W) where W: Write, R: Read {
@@ -115,7 +100,7 @@ pub fn process<R, W>(input: R, output: &mut W) where W: Write, R: Read {
     let total = lines.len();
     let mut count = 1;
     for line in lines.iter() {
-        progress_bar(count, total, 100, 100);
+        progress_bar(count, total, 100, 50);
         let mut sudoku = Sudoku::new(&line.as_ref().unwrap());
         sudoku.solve();
         write!(writer, "{}\n", sudoku).unwrap();
