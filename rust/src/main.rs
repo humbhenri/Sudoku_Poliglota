@@ -4,6 +4,8 @@ use std::env;
 use std::path::Path;
 use std::io::{self, Write, Read, BufReader, BufRead, BufWriter};
 
+extern crate time;
+
 const ROW_SIZE: usize = 9;
 
 #[derive(Debug)]
@@ -115,7 +117,9 @@ fn main() {
     let mut output_name = String::from("solved_");
     output_name.push_str(Path::new(&filename).file_name().and_then(|x| x.to_str()).unwrap());
     let mut output = File::create(output_name).ok().expect("cannot create output file");
-    process(input, &mut output);
+    let duration = time::Duration::span(||
+                                        process(input, &mut output));
+    println!("{}s.", duration.num_seconds());
 }
 
 #[cfg(test)]
