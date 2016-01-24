@@ -85,3 +85,12 @@ std::ostream& operator<<(std::ostream& os, const Sudoku& sudoku) {
 	os << "\n";
   return os;
 }
+
+void Sudoku::process(std::istream& input, std::ostream& output) {
+  std::string line;
+  while (std::getline(input, line)) {
+    Sudoku sudoku(line);
+    sudoku.solve();
+    output << sudoku;
+  }
+}

@@ -5,56 +5,40 @@
 #include <iterator>
 #include <time.h>
 #include <sys/time.h>
+#include <cerrno>
+#include <cstring>
+#include <cstdlib>
+#include <boost/filesystem.hpp>
+#include <chrono>
+#include <ctime>
 #include "Sudoku.h"
 
+using namespace boost::filesystem;
 
 int main(int argc, char const *argv[])
 {
-	std::ifstream infile(argv[1]);
-	if (infile)	 {
+  if (argc > 1) {
+    const std::string filename(argv[1]);
+    std::ifstream input(filename);
+    path p(filename);
+    std::ofstream output("solved_" + p.filename().string());
+    if (!input || !output) {
+      std::cerr << std::strerror(errno) << std::endl;
+      return EXIT_FAILURE;
+    }
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
+    Sudoku::process(input, output);
+    end = std::chrono::system_clock::now();
+    int elapsed_seconds = std::chrono::duration_cast<std::chrono::seconds>
+      (end-start).count();
+    std::cout << "Elapsed seconds: " << elapsed_seconds << std::endl;
+    input.close();
+    output.close();
+  } else {
+    std::cerr << "An input file is necessary :(" << std::endl;
+  }
 
-		// read entire file into memory
-		std::string fileData((std::istreambuf_iterator<char> (infile)) ,
-			std::istreambuf_iterator<char>()) ;
-		infile.close();
-        std::stringstream ssinput (fileData);
-
-
-		// solve all sudokus
-		struct timeval before;
-		gettimeofday (&before, NULL);
-
-		std::stringstream ssoutput;
-		std::string line;
-		while (std::getline (ssinput, line)) {
-			auto sudoku = Sudoku(line);
-      sudoku.solve();
-			ssoutput << sudoku;
-		}
-
-		struct timeval after;
-		gettimeofday (&after, NULL);
-		long duration = ((after.tv_sec * 1000000 + after.tv_usec) -
-			(before.tv_sec * 1000000 + before.tv_usec)) / 1000;
-
-		// write solutions to output
-		std::ofstream outfile;
-		std::string path (argv[1]);
-		std::string name;
-		if (unsigned found = path.find_last_of ("/\\")) {
-			name = "solved_" + path.substr(found+1);
-		} else {
-			name = std::string ("solved_") + argv[1];
-		}
-		outfile.open (name.c_str());
-		outfile << ssoutput.str();
-		outfile.close();
-
-		// time result
-		std::cout << "-- Elapsed time: " << duration << " ms." << std::endl;
-	}
-
-	return 0;
+  return EXIT_SUCCESS;
 }
-
 

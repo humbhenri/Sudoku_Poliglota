@@ -8,7 +8,7 @@ BIN = sudoku
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
 $(BIN): $(OBJ)
-	$(CXX) -o $@ $^ $(CXXFLAGS)
+	$(CXX) -o $@ $^ $(CXXFLAGS) -lboost_system -lboost_filesystem
 
 test: tests.cpp Sudoku.o
 	$(CXX) -o $@ $^ -lboost_unit_test_framework $(CXXFLAGS)

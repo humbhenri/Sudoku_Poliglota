@@ -11,6 +11,7 @@ class Sudoku {
   Sudoku(const std::string &onelinesudoku);
   void solve();
   friend std::ostream& operator<<(std::ostream& os, const Sudoku& dt);
+  static void process(std::istream& input, std::ostream& output);
 
  private:
   bool nextEmpty(int spot[2]);
