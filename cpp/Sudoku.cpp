@@ -1,4 +1,8 @@
 #include "Sudoku.h"
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+#include <iterator>
 
 Sudoku::Sudoku(const std::string &data) {
   int i = 0, j = 0;
@@ -86,11 +90,37 @@ std::ostream& operator<<(std::ostream& os, const Sudoku& sudoku) {
   return os;
 }
 
+void progress_bar(int step, int total_steps) {
+  int resolution = 100;
+  int width = 50;
+  if (total_steps / resolution == 0) return;
+  double ratio = double(step) / total_steps;
+  int count = ratio * width;
+  std::string fill(count, '=');
+  std::cout << std::setiosflags(std::ios::fixed)
+            << std::setprecision(2)
+            << ratio * 100.0 << " %"
+            << " ["
+            << std::setw(width)
+            << std::left
+            << fill
+            << "]"
+            << '\r';
+}
+
 void Sudoku::process(std::istream& input, std::ostream& output) {
-  std::string line;
-  while (std::getline(input, line)) {
+  std::vector<std::string> lines;
+  std::copy(std::istream_iterator<std::string>(input),
+            std::istream_iterator<std::string>(),
+            std::back_inserter(lines));
+  int count = 0;
+  int total = lines.size();
+  for (auto& line: lines) {
     Sudoku sudoku(line);
     sudoku.solve();
     output << sudoku;
+    count++;
+    progress_bar(count, total);
   }
+  std::cout << std::endl;
 }
