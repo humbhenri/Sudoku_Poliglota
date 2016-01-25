@@ -114,7 +114,7 @@ public class Sudoku {
 		Path input = Paths.get("", args[0]);
 		Path output = Paths.get(input.getParent().toString(), "solved_" + input.getFileName());
 		List<String> lines = Files.readAllLines(input, Charset.defaultCharset());
-		ProgressBar bar = new ProgressBar(0, lines.size(), 100, 100);
+		ProgressBar bar = new ProgressBar(0, lines.size(), 100, 50);
 		for (String line: lines) {
 			Sudoku sudoku = Sudoku.fromString(line);
 			sudoku.solve();
@@ -122,7 +122,7 @@ public class Sudoku {
 			bar.advance();
 		}
 		long duration = System.currentTimeMillis() - before;
-		System.out.println("-- Elapsed time: " + duration + " ms.");
+		System.out.println("\n-- Elapsed time: " + duration + " ms.");
 	}
 
 }
@@ -151,12 +151,8 @@ class ProgressBar {
 			return;
 		float ratio = step / (float) totalSteps;
 		int count = (int) (ratio * width);
-		System.out.printf("%3d%% [", (int) (ratio * 100));
-		for (int i = 0; i < count; i++)
-			System.out.print("=");
-		for (int i = count; i < width; i++)
-			System.out.print(" ");
-		System.out.print("]\r");
+		String fill = new String(new char[count]).replace("\0", "=");
+		System.out.print(String.format("\r%.2f %% [%-" + width + "s]", ratio * 100, fill));
 		System.out.flush();
 	}
 }
