@@ -8,7 +8,7 @@ import os
 BOARD_SIZE = 9
 
 
-def load_bar(step, total_steps, resolution, width):
+def show_progress_bar(step, total_steps, resolution, width):
     if total_steps / resolution == 0:
         return
     if step % (total_steps / resolution) != 0:
@@ -25,27 +25,22 @@ def load_bar(step, total_steps, resolution, width):
 
 
 def next_empty(sudoku):
-    for i in range(0, len(sudoku)):
-        for j in range(0, len(sudoku[i])):
-            if sudoku[i][j] == 0:
-                return i, j
-    return None
+    empty_slots = ((i, j) 
+        for i in range(0, BOARD_SIZE) 
+        for j in range(0, BOARD_SIZE) 
+        if sudoku[i][j] == 0) 
+    return next(empty_slots, None)
 
 
 def can_put(sudoku, x, y, val):
-    for i in range(0, len(sudoku)):
-        if sudoku[i][y] == val:
-            return False
-        if sudoku[x][i] == val:
-            return False
+    if any(val in (sudoku[i][y], sudoku[x][i]) for i in range(0, BOARD_SIZE)):
+        return False
     sq_x = x - (x % 3)
     sq_y = y - (y % 3)
-    for i in range(sq_x, sq_x + 3):
-        for j in range(sq_y, sq_y + 3):
-            if sudoku[i][j] == val:
-                return False
+    if any(sudoku[i][j] == val for i in range(sq_x, sq_x + 3) for j in range(sq_y, sq_y + 3)):
+        return False
     return True
-
+    
 
 def solve(sudoku):
     spot = next_empty(sudoku)
@@ -83,18 +78,16 @@ def process(input, output):
         sudoku = solve(sudoku)
         output.write(to_str(sudoku) + '\n')
         solved_sudokus += 1
-        load_bar(step=solved_sudokus, total_steps=total_sudokus, resolution=100, width=50)
+        show_progress_bar(step=solved_sudokus, total_steps=total_sudokus, resolution=100, width=50)
     after = time.time()
     print('--Elapsed {:.2f} ms'.format((after - before) * 1000))
 
 
 if __name__ == '__main__':
-    try:
-        filename = sys.argv[1]
-        with io.open(filename, 'r') as input:
-            with io.open('solved_' + os.path.basename(filename),
-                         'w') as output:
-                process(input, output)
-    except IndexError:
-        print('Insert file input')
+    if len(sys.argv) < 2:
+        print('Please inform the input file')
         sys.exit(1)
+    filename = sys.argv[1]
+    with io.open(filename, 'r') as input, \
+            io.open('solved_' + os.path.basename(filename), 'w') as output: 
+        process(input, output)
