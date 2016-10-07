@@ -175,3 +175,6 @@ sudoku.hi
 /java/.gradle/2.10/taskArtifacts/cache.properties
 /sudoku.exe
 /java/.gradle/2.10/taskArtifacts/cache.properties.lock
+
+node_modules/
+typings/

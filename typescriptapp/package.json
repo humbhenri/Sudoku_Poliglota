@@ -1,0 +1,19 @@
+{
+  "name": "typescriptapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/main.js",
+  "scripts": {
+    "test": "mocha --opts mocha.opts -w"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^3.0.2",
+    "mocha": "^3.1.0",
+    "ts-node": "^1.4.0",
+    "typescript": "^2.0.3",
+    "chai": "^3.5.0"    
+  }
+}
