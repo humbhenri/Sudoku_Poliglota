@@ -26,7 +26,7 @@ describe('Sudoku', function() {
 
     describe('solution', function() {
 
-        it('should sove a sudoku giving the following response', function() {
+        it('should solve a sudoku giving the following response', function() {
             sudoku.solve();
             expect(sudoku.board).to.eql(
                   [[2, 7, 3, 4, 8, 1, 9, 6, 5],
