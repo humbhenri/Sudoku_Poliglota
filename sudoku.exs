@@ -10,24 +10,23 @@ defmodule Sudoku do
     end
 
     def read_input(str) do
-         Stream.with_index(str) |> 
-         Stream.map(fn({v, idx}) -> {to_int(v), line_column(idx)} end) 
+         Enum.with_index(str) 
+         |> Map.new(fn({v, idx}) -> {line_column(idx), to_int(v)} end)
     end
 
     def next_empty(sudoku) do
-        Stream.filter(sudoku, fn({v, idx}) -> v == 0 end)
-        Stream.take(1) |> 
-        Stream.map(fn({v, idx}) -> idx end)
-        Enum.to_list |> 
-        List.first
+        case (Enum.find sudoku, fn({_, v}) -> v == 0 end) do
+        {idx, _} -> idx
+        _ -> nil
+        end
     end
 
     def line(sudoku, n) do
-        Stream.filter(sudoku, fn({v, {i, j}}) -> i == n end) 
+        Enum.filter(sudoku, fn({{i, _}, _}) -> i==0 end) 
     end
 
     def column(sudoku, n) do
-        Stream.filter(sudoku, fn({v, {i, j}}) -> j == n end) 
+        Enum.filter(sudoku, fn({{_, j}, _}) -> j==0 end)
     end
 
     def square(sudoku, i, j) do
