@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
+#include <libgen.h>
+
 #define BOARD_SIZE 9
 
 void to_str(int sudoku[BOARD_SIZE][BOARD_SIZE], char *dest);
@@ -28,6 +30,10 @@ int main(int argc, char const *argv[])
 		printf("Could not open file %s\n", argv[1]);
 		exit(EXIT_FAILURE);
 	}
+    int progress = 0;
+    if (argc > 2 && strcmp(argv[2], "-p")) {
+        progress = 1;
+    }
 
 	/* read entire file into memory */
 	char *contents = read_entire_file(f);
@@ -51,7 +57,9 @@ int main(int argc, char const *argv[])
 		solve(sudoku);
 		to_str(sudoku, solved);
 		result_size = append_str(&result, result_size, solved);
-		load_bar(++sudokus_solved, total_sudokus, 100, 100);
+        if (progress) {
+            load_bar(++sudokus_solved, total_sudokus, 100, 100);
+        }
 	} while (*ptr);
 	free(contents);
 
@@ -62,7 +70,8 @@ int main(int argc, char const *argv[])
 
 	/* Write to file the solved sudokus */
 	char output_name[64];
-	sprintf(output_name, "solved_%s", argv[1]);
+    char* filename = basename(argv[1]);
+	sprintf(output_name, "solved_%s", filename);
 	FILE *output = fopen(output_name, "w");
 	if (!output) {
 		printf("Could not open file %s\n", output_name);
@@ -232,5 +241,5 @@ void load_bar(int step, int total_steps, int resolution, int width) {
     for (int x=count; x<width; ++x)
         printf(" ");
     printf("]\r");
-    fflush();
+    fflush(stdin);
 }

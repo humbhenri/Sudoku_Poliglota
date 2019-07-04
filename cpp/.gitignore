@@ -1,0 +1,4 @@
+*.o
+sudoku
+solved_input_huge.txt
+

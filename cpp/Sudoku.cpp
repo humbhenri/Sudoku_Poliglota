@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <iterator>
+#include <vector>
 
 Sudoku::Sudoku(const std::string &data) {
   int i = 0, j = 0;

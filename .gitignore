@@ -178,3 +178,6 @@ sudoku.hi
 
 node_modules/
 typings/
+
+**/solved_input_huge.txt
+
