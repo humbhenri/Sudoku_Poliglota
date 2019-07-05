@@ -9,6 +9,7 @@ import Data.Time.Clock(diffUTCTime, getCurrentTime)
 import System.Environment(getArgs)
 import System.IO(hFlush, stdout)
 import Text.Printf(printf)
+import System.FilePath
 
 boardSize = 9
 
@@ -93,6 +94,6 @@ main = do
 	end <- getCurrentTime
 	
 	-- present results
-	putStrLn $ " -- Elapsed time: " ++ (show (diffUTCTime end start))
-	writeFile ("solved_" ++ input) result
+	putStrLn $ " -- Elapsed time: " ++ (show (diffUTCTime end start)) 
+	writeFile ("solved_" ++ (takeFileName input)) result
 
