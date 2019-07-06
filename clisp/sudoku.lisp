@@ -65,31 +65,24 @@
                  (return-from solve)))
           (setf (aref sudoku x y) 0)))))) ;solution not found, backtrack
 
-;;;
-;;; read entire file into memory
-;;;
-(defparameter inputname (or (second *posix-argv*) "input_huge.txt"))
 (defparameter data "")
-(with-open-file (stream inputname)
-  (setf data (remove-if-not #'digit-char-p (slurp-file stream))))
-
-;;;
-;;; resolve all sudokus
-;;;
 (defparameter result "")
 
-(let ((before (get-internal-run-time)))
-  (loop initially (setf result "")
-     repeat (/ (length data) +board-size+)
-     for start = 0 then (+ start +board-size+)
-     for row = (subseq data start (+ start +board-size+))
-     for sudoku = (from-str row)
-     do (solve sudoku)
-       (setf result (concatenate 'string result (to-str sudoku))))
-  (format t "--Elapsed time: ~a ms ~%" (* 1000 (/ (- (get-internal-run-time) before) internal-time-units-per-second))))
+(defun main ()
+  (let ((inputname (second *posix-argv*)))
+    (with-open-file (stream inputname)
+      (setf data (remove-if-not #'digit-char-p (slurp-file stream))))
+    (let ((before (get-internal-run-time)))
+      (loop initially (setf result "")
+            repeat (/ (length data) +board-size+)
+            for start = 0 then (+ start +board-size+)
+            for row = (subseq data start (+ start +board-size+))
+            for sudoku = (from-str row)
+            do (solve sudoku)
+            (setf result (concatenate 'string result (to-str sudoku))))
+      (format t "--Elapsed time: ~a ms ~%" (* 1000 (/ (- (get-internal-run-time) before) internal-time-units-per-second))))
+    (let* ((input (file-namestring (pathname inputname)))
+           (filename (concatenate 'string "solved_" input)))
+      (with-open-file (stream filename :direction :output :if-exists :supersede)
+        (format stream "~a~%" result)))))
 
-;;; write results to file
-(let* ((input (file-namestring (pathname inputname)))
-       (filename (concatenate 'string "solved_" input)))
-  (with-open-file (stream filename :direction :output :if-exists :supersede)
-    (format stream "~a~%" result)))
