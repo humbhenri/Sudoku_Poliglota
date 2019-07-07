@@ -127,7 +127,7 @@ char* from_str(char *source, int sudoku[BOARD_SIZE][BOARD_SIZE]) {
 				source++;
 			}
 			if (*source) {
-				sudoku[x][y] = *source - 48;
+				sudoku[x][y] = *source - '0';
 				source++;
 			}
 		}
