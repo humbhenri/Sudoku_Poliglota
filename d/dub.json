@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"humberto"
+	],
+	"copyright": "Copyright © 2019, humberto",
+	"description": "A minimal D application.",
+	"license": "proprietary",
+	"name": "sudoku"
+}
