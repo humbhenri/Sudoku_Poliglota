@@ -112,7 +112,12 @@ end
 
 
 -- Read sudokus into memory
-inputname = arg[1] or 'input_small.txt'
+if (#arg < 1) then
+	print('Input file is necessary')
+	return
+end
+
+inputname = arg[1]
 f = io.input(inputname)
 data = io.read('*a')
 f:close()
@@ -133,6 +138,7 @@ end
 print('-- Elapsed time ' .. (os.time() - before) .. ' s')
 
 -- write solutions to file
-f = io.output('solved_' .. inputname)
+outputname = 'solved_' .. inputname:match("[^/]+$")
+f = io.output(outputname)
 f:write(result)
 f:close()
