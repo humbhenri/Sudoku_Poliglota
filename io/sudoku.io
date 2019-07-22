@@ -51,23 +51,30 @@ Sudoku solve := method(
 				self solve;
 				if(self nextEmpty not, return)		 					// solution found				
 			)
-		);
-		self board at(x) atPut(y, val)
+		),
+		self board at(x) atPut(y, 0)
 	)
 )
 
 // Main program
 
 // read entire file into memory
-entry := if(System args size > 1, System args at(1), "input_small.txt")
-input := File open(entry) readToEnd 
+
+// entry := System args at(1)
+// input := File open(entry) readToEnd 
 
 // solve all sudokus
-lines := input split("\n")
-lines foreach(line,
-	sudoku := Sudoku clone;
-	sudoku fromStr(line);
-	(sudoku toStr .. "\n") println;
-	sudoku solve;
-	(sudoku toStr .. "\n") println;
-)
+// lines := input split("\n")
+// lines foreach(line,
+// 	sudoku := Sudoku clone;
+// 	sudoku fromStr(line);
+// 	(sudoku toStr .. "\n") println;
+// 	sudoku solve;
+// 	(sudoku toStr .. "\n") println;
+// )
+s := Sudoku clone 
+s fromStr("200000060000075030048090100000300000300010009000008000001020570080730000090000004")
+Testing assertEqual(list(0, 1), s nextEmpty)
+Testing assertTrue(s canPut(0, 1, 1))
+Testing assertFalse(s canPut(0, 1, 2))
+
