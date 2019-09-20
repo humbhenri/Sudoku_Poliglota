@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-std=c++11 -Wall -pedantic -O3
+CXXFLAGS=-std=c++17 -Wall -pedantic -O3
 DEPS = Sudoku.h
 OBJ = Sudoku.o main.o
 BIN = sudoku
@@ -8,7 +8,7 @@ BIN = sudoku
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
 $(BIN): $(OBJ)
-	$(CXX) -o $@ $^ $(CXXFLAGS) -lboost_system -lboost_filesystem
+	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++fs 
 
 test: tests.cpp Sudoku.o
 	$(CXX) -o $@ $^ -lboost_unit_test_framework $(CXXFLAGS)

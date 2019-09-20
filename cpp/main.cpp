@@ -8,19 +8,17 @@
 #include <cerrno>
 #include <cstring>
 #include <cstdlib>
-#include <boost/filesystem.hpp>
 #include <chrono>
 #include <ctime>
+#include <filesystem>
 #include "Sudoku.h"
-
-using namespace boost::filesystem;
 
 int main(int argc, char const *argv[])
 {
   if (argc > 1) {
     const std::string filename(argv[1]);
     std::ifstream input(filename);
-    path p(filename);
+    std::filesystem::path p(filename);
     std::ofstream output("solved_" + p.filename().string());
     if (!input || !output) {
       std::cerr << std::strerror(errno) << std::endl;
