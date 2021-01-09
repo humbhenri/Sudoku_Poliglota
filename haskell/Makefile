@@ -1,12 +1,13 @@
-CC=ghc
+GHC=ghc
 DEPS=sudoku.hs
 BIN=sudoku
 FLAGS=-O2 --make -w
 
 $(BIN): $(DEPS)
-	$(CC) $(FLAGS) $^ > /dev/null
+	$(GHC) $(FLAGS) $^ > /dev/null
 
-.PHONY: clean
+.PHONY: clean run
+
 clean:
 	rm -f solved_input* $(BIN).o $(BIN).hi $(BIN)
 
