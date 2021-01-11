@@ -4,7 +4,6 @@ module Main where
 import Control.DeepSeq(deepseq)
 import Data.Char(ord)
 import Data.List(intercalate, elemIndex, find)
-import Data.Maybe(isNothing)
 import Data.Time.Clock(diffUTCTime, getCurrentTime)
 import System.Environment(getArgs)
 import System.IO(hFlush, stdout)
@@ -13,6 +12,14 @@ import System.FilePath
 
 boardSize = 9
 
+data Board = Board [[Int]]
+
+instance Show Board where
+        show (Board b) = unlines $ map (unwords . map show) b
+
+instance Read Board where
+        readsPrec _ s = [(Board $ fromStr s, "")]
+
 groupN _ [] = []
 groupN n xs = a : groupN n b where
                     (a,b) = splitAt n xs
@@ -20,19 +27,19 @@ groupN n xs = a : groupN n b where
 fromStr = groupN boardSize . map toInt
         where toInt = abs . (48 -) . ord
 
-toStr = unlines . map (intercalate " " . map show)
-
 -- return the next row, column where value is zero
-nextEmpty sudoku = case (elemIndex 0 (concat sudoku)) of
+nextEmpty :: Board -> [Int]
+nextEmpty (Board b) = case (elemIndex 0 (concat b)) of
         Just n  -> [n `div` boardSize, n `mod` boardSize]
         Nothing -> []
 
 -- return true if val can be put at row and col of sudoku
-canPut sudoku row col val =
-        and [val `notElem` (sudoku !! row), -- test row
-                 val `notElem` [r !! col | r <- sudoku], -- test column
+canPut :: Board -> Int -> Int -> Int -> Bool
+canPut (Board b) row col val =
+        and [val `notElem` (b !! row), -- test row
+                 val `notElem` [r !! col | r <- b], -- test column
         -- test square
-             val `notElem` [sudoku!!i!!j | i <- [sqX .. sqX+2], j <- [sqY .. sqY+2]]]
+             val `notElem` [b!!i!!j | i <- [sqX .. sqX+2], j <- [sqY .. sqY+2]]]
         where
                 sqX = row - (row `mod` 3)
                 sqY = col - (col `mod` 3)
@@ -40,21 +47,23 @@ canPut sudoku row col val =
 updateList xs pos val = x ++ val : ys
         where (x,_:ys) = splitAt pos xs
 
-updateSudoku sudoku row col val = updateList sudoku row (updateList (sudoku!!row) col val)
+updateSudoku :: Board -> Int -> Int -> Int -> Board
+updateSudoku (Board b) row col val = Board $ updateList b row (updateList (b!!row) col val)
 
 -- solve a sudoku, return the solved sudoku if found solution or the same otherwise
-solve sudoku
-        | spot == [] = sudoku -- sudoku is solved
+solve :: Board -> Board        
+solve board
+        | spot == [] = board -- sudoku is solved
         | otherwise =
                 let (row:col:_) = spot
                 in
-                        case find (\s -> nextEmpty s == []) (map (\val->(if canPut sudoku row col val
-                                then solve (updateSudoku sudoku row col val)
-                                else sudoku)) [1..9]) of
+                        case find (\s -> nextEmpty s == []) (map (\val->(if canPut board row col val
+                                then solve (updateSudoku board row col val)
+                                else board)) [1..9]) of
                                         Just s -> s
-                                        Nothing -> sudoku
+                                        Nothing -> board
         where
-                spot = nextEmpty sudoku
+                spot = nextEmpty board
 
 -- progress bar
 loadBar :: Int -> Int -> Int -> Int -> IO()
@@ -75,7 +84,8 @@ loadBar step totalSteps resolution width =
 
 process :: Int -> Int -> String -> IO String
 process step totalSteps sudoku = do
-        let result = (toStr . solve . fromStr) sudoku
+        let board = (read sudoku)::Board
+        let result = (show . solve) board
         result `deepseq` loadBar step totalSteps 20 50 -- deepseq forces evaluation of result
         return result
 
@@ -88,9 +98,8 @@ main = do
 
         -- solve all sudokus
         start <- getCurrentTime
-        let result = intercalate "\n" $ map (toStr . solve .fromStr) $ sudokus
         solutions <- mapM (\(step,sudoku) -> process step total sudoku) (zip [1..] sudokus)
-        let result = intercalate "\n" solutions
+        let result = unlines solutions
         end <- getCurrentTime
 
         -- present results
