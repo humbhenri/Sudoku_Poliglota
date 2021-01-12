@@ -1,14 +1,14 @@
 -- sudoku solver using backtrack
 module Main where
 
-import Control.DeepSeq(deepseq)
-import Data.Char(ord)
-import Data.List(intercalate, elemIndex, find)
-import Data.Time.Clock(diffUTCTime, getCurrentTime)
-import System.Environment(getArgs)
-import System.IO(hFlush, stdout)
-import Text.Printf(printf)
+import Control.DeepSeq (deepseq)
+import Data.Char (ord)
+import Data.List (elemIndex, find)
+import Data.Time.Clock (diffUTCTime, getCurrentTime)
+import System.Environment (getArgs)
 import System.FilePath
+import System.IO (hFlush, stdout)
+import Text.Printf (printf)
 
 boardSize = 9
 
@@ -51,7 +51,7 @@ updateSudoku :: Board -> Int -> Int -> Int -> Board
 updateSudoku (Board b) row col val = Board $ updateList b row (updateList (b!!row) col val)
 
 -- solve a sudoku, return the solved sudoku if found solution or the same otherwise
-solve :: Board -> Board        
+solve :: Board -> Board
 solve board
         | spot == [] = board -- sudoku is solved
         | otherwise =

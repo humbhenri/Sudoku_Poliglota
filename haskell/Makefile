@@ -1,5 +1,5 @@
 GHC=ghc
-DEPS=sudoku.hs
+DEPS=.hs
 BIN=sudoku
 FLAGS=-O2 --make -w
 

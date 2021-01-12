@@ -1,4 +1,6 @@
 sudoku
 sudoku.hi
 sudoku.o
-
+sudoku.exe
+.stack-work
+solved_*
