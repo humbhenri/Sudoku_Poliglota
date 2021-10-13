@@ -7,11 +7,9 @@
 
 Sudoku::Sudoku(const std::string &data) {
   int i = 0, j = 0;
-	for (auto it=data.begin();
-       it!=data.end() && i < BOARD_SIZE && j < BOARD_SIZE;
-       ++it) {
-		if (isdigit(*it)) {
-			board[i][j] = *it - 48;
+	for (auto it : data) {
+		if (isdigit(it)) {
+			board[i][j] = it - 48;
 		}
     if (j == BOARD_SIZE - 1) {
       i += 1 % BOARD_SIZE;
@@ -54,7 +52,7 @@ bool Sudoku::nextEmpty(int spot[2]) {
 	return false;
 }
 
-bool Sudoku::canPut(int spot[2], int val) {
+bool Sudoku::canPut(const int spot[2], int val) {
 	int x = spot[0];
 	int y = spot[1];
 	for (int i=0; i<BOARD_SIZE; i++) {

@@ -13,7 +13,7 @@ $(BIN): $(OBJ)
 test: tests.cpp Sudoku.o
 	$(CXX) -o $@ $^ -lboost_unit_test_framework $(CXXFLAGS)
 
-.PHONY: clean
+.PHONY: clean run
 
 clean:
 	rm -f *.o $(BIN) test solved_*
