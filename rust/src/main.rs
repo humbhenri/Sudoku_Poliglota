@@ -84,29 +84,58 @@ impl fmt::Display for Sudoku {
     }
 }
 
-pub fn progress_bar(step: usize, total_steps: usize, resolution: usize, width: usize) {
-    if total_steps / resolution == 0 {
-        return
+struct Progress<Iter> {
+    iter: Iter,
+    step: usize,
+    width: usize,
+    total: usize
+}
+
+impl<Iter> Progress<Iter> where Iter: ExactSizeIterator {
+    pub fn new(iter: Iter) -> Self {
+        let mut p = Progress { iter, step: 0, width: 50, total: 0 };
+        p.total = p.iter.len();
+        p
     }
-    let ratio: f32 = step as f32 / total_steps as f32;
-    let count: f32 = ratio * width as f32;
-    let fill = String::from_utf8(vec![b'='; count as usize]).unwrap();
-    print!("\r{ratio:.2}% [{fill:<width$}]", ratio=ratio * 100.0, fill=fill, width=width);
-    io::stdout().flush().ok().expect("could not flush");
+}
+
+impl<Iter> fmt::Display for Progress<Iter> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let ratio: f32 = self.step as f32 / self.total as f32;
+        let count: f32 = ratio * self.width as f32;
+        let fill = String::from_utf8(vec![b'='; count as usize]).unwrap();
+        io::stdout().flush().ok().expect("could not flush");
+        write!(f, "\r{ratio:.2}% [{fill:<width$}]", ratio=ratio * 100.0, fill=fill, width=self.width)
+    }
+}
+
+impl<Iter> Iterator for Progress<Iter> where Iter: ExactSizeIterator {
+    type Item = Iter::Item;
+    fn next(&mut self) -> Option<Self::Item> {
+        print!("{}", &self);
+        self.step += 1;
+        self.iter.next()
+    }
+}
+
+trait ProgressIteratorExt: Sized {
+    fn progress(self) -> Progress<Self>;
+}
+
+impl<Iter> ProgressIteratorExt for Iter where Iter: ExactSizeIterator {
+    fn progress(self) -> Progress<Self> {
+        Progress::new(self)
+    }
 }
 
 pub fn process<R, W>(input: R, output: &mut W) where W: Write, R: Read {
     let reader = BufReader::new(input);
     let mut writer = BufWriter::new(output);
     let lines = reader.lines().collect::<Vec<_>>();
-    let total = lines.len();
-    let mut count = 1;
-    for line in lines.iter() {
-        progress_bar(count, total, 100, 50);
+    for line in lines.iter().progress() {
         let mut sudoku = Sudoku::new(&line.as_ref().unwrap());
         sudoku.solve();
         write!(writer, "{}\n", sudoku).unwrap();
-        count += 1;
     }
     println!("\n");
 }
