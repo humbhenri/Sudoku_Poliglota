@@ -80,7 +80,7 @@
             for sudoku = (from-str row)
             do (solve sudoku)
             (setf result (concatenate 'string result (to-str sudoku))))
-      (format t "--Elapsed time: ~a ms ~%" (* 1000 (/ (- (get-internal-run-time) before) internal-time-units-per-second))))
+      (format t "--Elapsed time: ~a ms ~%" (* 1000.0 (/ (- (get-internal-run-time) before) internal-time-units-per-second))))
     (let* ((input (file-namestring (pathname inputname)))
            (filename (concatenate 'string "solved_" input)))
       (with-open-file (stream filename :direction :output :if-exists :supersede)
