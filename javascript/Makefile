@@ -1,3 +1,5 @@
 run:
-	/usr/bin/time -f '%e' node sudoku.js ../input_huge.txt > /dev/null
-
+	node sudoku.js ../input_huge.txt
+clean:
+	rm -rf solved*
+.PHONY: run clean

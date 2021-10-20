@@ -6,7 +6,7 @@ BIN=Sudoku
 $(BIN): $(DEPS)
 	$(CC) $(FLAGS) $^
 
-.PHONY: clean
+.PHONY: clean run
 clean:
 	rm -f $(BIN).exe solved_input_huge.txt
 

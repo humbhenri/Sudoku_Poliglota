@@ -1,7 +1,7 @@
 run:
-	/usr/bin/time -f '%e' python sudoku.py ../input_huge.txt > /dev/null
+	python sudoku.py ../input_huge.txt
 
-.PHONY: clean
+.PHONY: clean run
 
 clean:
 	rm -f solved_*
