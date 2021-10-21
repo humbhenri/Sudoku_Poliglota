@@ -1,3 +1,5 @@
+nothing:
+	echo do nothing
 run:
 	lua sudoku.lua ../input_huge.txt
 

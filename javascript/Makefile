@@ -1,3 +1,5 @@
+default:
+	echo Do nothing
 run:
 	node sudoku.js ../input_huge.txt
 clean:

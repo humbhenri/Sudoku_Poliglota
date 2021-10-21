@@ -19,4 +19,4 @@ clean:
 	rm -f *.o $(BIN) test solved_*
 
 run: $(BIN)
-	/usr/bin/time -f '%e' ./$(BIN) ../input_huge.txt > /dev/null
+	./$(BIN) ../input_huge.txt > /dev/null

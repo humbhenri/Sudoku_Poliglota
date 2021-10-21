@@ -1,3 +1,5 @@
+nothing:
+	echo do nothing
 run:
 	python sudoku.py ../input_huge.txt
 
