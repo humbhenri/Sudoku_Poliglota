@@ -1,124 +1,150 @@
 // Solve a sudoku using backtrack
+const assert = require("assert");
 
-var ROW_SIZE = 9
+const ROW_SIZE = 9;
 
-// return a sudoku from a 81 character line
-function fromStr(text) {
-	var sudoku = new Array();
-	for (var k = 0; k<ROW_SIZE; k++) { sudoku[k] = new Array(); }
-	var i = 0;
-	var j = 0;
-	for (var k = 0; k < text.length; k++) {
-		if (! isNaN(text.charAt(k)) && i < ROW_SIZE && j < ROW_SIZE) {
-			sudoku[i][j] = parseInt(text.charAt(k));
-			i = j == ROW_SIZE - 1 ? i+1 : i;
-			j = (j + 1) % ROW_SIZE;
-		}
-	}
-	return sudoku;
-}
+class Sudoku {
+  #board;
 
-// string representation from a sudoku 
-function toStr(sudoku) {
-	var result = new Array();
-	for (var i=0; i<sudoku.length; i++) {
-		result[i] = sudoku[i].join(" ");
-	}
-	return result.join("\n");
-}
+  constructor(text) {
+    this.#board = new Array();
+    for (let k = 0; k < ROW_SIZE; k++) {
+      this.#board[k] = new Array();
+    }
+    let i = 0;
+    let j = 0;
+    for (let k = 0; k < text.length; k++) {
+      if (!isNaN(text.charAt(k)) && i < ROW_SIZE && j < ROW_SIZE) {
+        this.#board[i][j] = parseInt(text.charAt(k));
+        i = j == ROW_SIZE - 1 ? i + 1 : i;
+        j = (j + 1) % ROW_SIZE;
+      }
+    }
+  }
 
-// return next spot where value is zero
-function nextEmpty(sudoku) {
-	for (var i=0; i<sudoku.length; i++) {
-		for (var j=0; j<sudoku.length; j++) {
-			if (sudoku[i][j] == 0) {
-				return [i, j];
-			}
-		}
-	}
-	return null;
-}
+  toString() {
+    const result = new Array();
+    for (let i = 0; i < this.#board.length; i++) {
+      result[i] = this.#board[i].join(" ");
+    }
+    return result.join("\n");
+  }
 
-// return true if the element can be put at the specified spot
-function canPut(sudoku, x, y, val) {
-	for (var i=0; i<ROW_SIZE; i++) {
-		if (sudoku[x][i] == val) return false; // row test
-		if (sudoku[i][y] == val) return false; // column test
-	}
-	// square test
-	var sqX = x-(x%3);
-    var sqY = y-(y%3);
-    for (var i=sqX; i<sqX+3; i++) {
-    	for (var j=sqY; j<sqY+3; j++) {
-    		if (sudoku[i][j] == val) return false;
-    	}
+  nextEmpty() {
+    for (let i = 0; i < this.#board.length; i++) {
+      for (let j = 0; j < this.#board.length; j++) {
+        if (this.#board[i][j] == 0) {
+          return [i, j];
+        }
+      }
+    }
+    return null;
+  }
+
+  canPut(x, y, val) {
+    for (let i = 0; i < ROW_SIZE; i++) {
+      if (this.#board[x][i] == val) return false; // row test
+      if (this.#board[i][y] == val) return false; // column test
+    }
+    // square test
+    let sqX = x - (x % 3);
+    let sqY = y - (y % 3);
+    for (let i = sqX; i < sqX + 3; i++) {
+      for (let j = sqY; j < sqY + 3; j++) {
+        if (this.#board[i][j] == val) return false;
+      }
     }
     return true;
+  }
+
+  solve() {
+    let spot = this.nextEmpty();
+    if (spot) {
+      let x = spot[0];
+      let y = spot[1];
+      for (let val = 1; val < 10; val++) {
+        if (this.canPut(x, y, val)) {
+          this.#board[x][y] = val;
+          this.solve();
+          if (!this.nextEmpty()) {
+            // solution found
+            return;
+          }
+        }
+      }
+      // solution not found, backtracking
+      this.#board[x][y] = 0;
+    }
+  }
 }
 
-// return a solved sudoku, or the argument if cannot find the solution
-function solve(sudoku) {
-	var spot = nextEmpty(sudoku);
-	if (spot) {
-		var x = spot[0];
-		var y = spot[1];
-		for (var val=1; val<10; val++) {
-			if (canPut(sudoku, x, y, val)) {
-				sudoku[x][y] = val;
-				newSudoku = solve(sudoku);
-				if (! nextEmpty(newSudoku)) {
-					// solution found
-					return newSudoku;
-				}
-			}
-		}
-		// solution not found, backtracking
-		sudoku[x][y] = 0;
-	}
-	return sudoku;
-}
+// tests
+(function () {
+  const sudoku = new Sudoku(
+    "200000060000075030048090100000300000300010009000008000001020570080730000090000004"
+  );
+  assert.deepEqual(sudoku.nextEmpty(), [0, 1]);
+  assert.ok(sudoku.canPut(0, 1, 1));
+  sudoku.solve();
+  assert.ok(!sudoku.nextEmpty());
+})();
 
 // progress bar
-var util = require('util');
+var util = require("util");
 function loadBar(step, totalSteps, resolution, width) {
-	if (parseInt(totalSteps/resolution) != 0 && (step % parseInt(totalSteps/resolution) == 0)) {
-		ratio = step/totalSteps;
-		count = parseInt(ratio * width);
-		process.stdout.write(util.format('%d%% [', parseInt(ratio * 100)));
-		for (var i=0; i<count; i++) { process.stdout.write('='); }
-		for (var i=count+1; i<width; i++) { process.stdout.write(' '); }
-		process.stdout.write(']\r');
-	}
+  if (
+    parseInt(totalSteps / resolution) != 0 &&
+    step % parseInt(totalSteps / resolution) == 0
+  ) {
+    ratio = step / totalSteps;
+    count = parseInt(ratio * width);
+    process.stdout.write(util.format("%d%% [", parseInt(ratio * 100)));
+    for (var i = 0; i < count; i++) {
+      process.stdout.write("=");
+    }
+    for (var i = count + 1; i < width; i++) {
+      process.stdout.write(" ");
+    }
+    process.stdout.write("]\r");
+  }
 }
 
 // read entire sudokus into memory
-var fs = require('fs');
-var input = process.argv[2];
-var path = require('path');
-fs.readFile(input, 'ascii', function(err, data) {
+const fs = require("fs");
+const path = require("path");
+const input = process.argv[2];
+if (!input) {
+  console.log("Input file necessary");
+  return;
+}
+fs.readFile(input, "ascii", function (err, data) {
+  if (err) {
+    console.log(err);
+    return;
+  }
+  let before = new Date().getTime();
 
-	var before = new Date().getTime();
+  let result = "";
 
-	var result = "";
+  // solve all sudokus
+  let lines = data.replace(/^\s+|\s+$/g, "").split("\n");
+  let total = lines.length;
+  for (let i = 0; i < total; i++) {
+    let sudoku = new Sudoku(lines[i]);
+    sudoku.solve();
+    result = result + sudoku.toString() + "\n\n";
+    loadBar(i, total, 20, 50);
+  }
 
-	// solve all sudokus
-	var lines = data.replace(/^\s+|\s+$/g, '').split("\n");
-	var total = lines.length;
-	for (var i=0; i<total; i++) {
-		var sudoku = fromStr(lines[i]);
-		result = result + toStr(solve(sudoku)) + "\n\n";
-		loadBar(i, total, 20, 50);
-	}
+  let after = new Date().getTime();
 
-	var after = new Date().getTime();
-
-	// write solution to file
-    var output = path.basename(input); 
-	fs.writeFile('solved_' + output, result, function(err) {
-		if (!err) {
-			console.log(" --Elapsed time: %d ms", after - before);
-        } else {
-            console.log(`Error: ${err}`);
-        }
-	});
+  // write solution to file
+  let output = path.basename(input);
+  fs.writeFile("solved_" + output, result, function (err) {
+    if (!err) {
+      console.log(" --Elapsed time: %d ms", after - before);
+    } else {
+      console.log(`Error: ${err}`);
+    }
+  });
 });
