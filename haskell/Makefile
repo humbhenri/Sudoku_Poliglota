@@ -1,15 +1,6 @@
-GHC=ghc
-DEPS=.hs
-BIN=sudoku
-FLAGS=-O2 --make -w
-
-$(BIN): $(DEPS)
-	$(GHC) $(FLAGS) $^ > /dev/null
-
-.PHONY: clean run
-
+build:
+	stack build
+run:
+	stack run ../input_huge.txt
 clean:
-	rm -f solved_input* $(BIN).o $(BIN).hi $(BIN)
-
-run: $(BIN)
-	/usr/bin/time -f '%e' ./$(BIN) ../input_huge.txt > /dev/null
+	rm -f solved_input_huge.txt

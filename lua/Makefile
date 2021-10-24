@@ -1,7 +1,9 @@
+nothing:
+	echo do nothing
 run:
-	/usr/bin/time -f '%e' lua sudoku.lua ../input_huge.txt > /dev/null
+	lua sudoku.lua ../input_huge.txt
 
-.PHONY: clean
+.PHONY: clean run
 
 clean:
 	rm -f solved_*

@@ -1,12 +1,12 @@
-DEPS=target/uberjar/clojureapp-0.1.0-SNAPSHOT-standalone.jar
+JAR=target/uberjar/clojureapp-0.1.0-SNAPSHOT-standalone.jar
 
-sudoku: $(DEPS)
+$(JAR):
 	LEIN_SILENT=true lein uberjar
 
-run: sudoku
-	/usr/bin/time -f '%E' java -jar $(DEPS) ../input_huge.txt > /dev/null
-
-.PHONY: clean
+run: $(JAR)
+	java -jar $(JAR) ../input_huge.txt
 
 clean:
 	rm -rf solved_input_huge.txt target/
+
+.PHONY: clean run

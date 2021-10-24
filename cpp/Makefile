@@ -13,10 +13,10 @@ $(BIN): $(OBJ)
 test: tests.cpp Sudoku.o
 	$(CXX) -o $@ $^ -lboost_unit_test_framework $(CXXFLAGS)
 
-.PHONY: clean
+.PHONY: clean run
 
 clean:
 	rm -f *.o $(BIN) test solved_*
 
 run: $(BIN)
-	/usr/bin/time -f '%e' ./$(BIN) ../input_huge.txt > /dev/null
+	./$(BIN) ../input_huge.txt > /dev/null
