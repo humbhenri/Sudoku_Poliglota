@@ -25,6 +25,7 @@ const projects = ['c',
 //    'python', 
     'rust', 
 //    'typescriptapp'
+    'zig'
 ];
 
 async function execShell(cmd) {
