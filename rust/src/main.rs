@@ -78,7 +78,7 @@ impl fmt::Display for Sudoku {
         for row in self.0.iter() {
             s.push_str(
                 &row.iter().map(|&x| x.to_string()).collect::<Vec<String>>().join(" "));
-            s.push_str("\n");
+            s.push('\n');
         }
         write!(f, "{}", s)
     }
@@ -104,7 +104,7 @@ impl<Iter> fmt::Display for Progress<Iter> {
         let ratio: f32 = self.step as f32 / self.total as f32;
         let count: f32 = ratio * self.width as f32;
         let fill = String::from_utf8(vec![b'='; count as usize]).unwrap();
-        io::stdout().flush().ok().expect("could not flush");
+        io::stdout().flush().expect("could not flush");
         write!(f, "\r{ratio:.2}% [{fill:<width$}]", ratio=ratio * 100.0, fill=fill, width=self.width)
     }
 }
@@ -133,19 +133,19 @@ pub fn process<R, W>(input: R, output: &mut W) where W: Write, R: Read {
     let mut writer = BufWriter::new(output);
     let lines = reader.lines().collect::<Vec<_>>();
     for line in lines.iter().progress() {
-        let mut sudoku = Sudoku::new(&line.as_ref().unwrap());
+        let mut sudoku = Sudoku::new(line.as_ref().unwrap());
         sudoku.solve();
-        write!(writer, "{}\n", sudoku).unwrap();
+        writeln!(writer, "{}", sudoku).unwrap();
     }
     println!("\n");
 }
 
 fn main() {
     let filename = env::args().nth(1).expect("input file name is necessary");
-    let input = File::open(&filename).ok().expect("file not found");
+    let input = File::open(&filename).expect("file not found");
     let mut output_name = String::from("solved_");
     output_name.push_str(Path::new(&filename).file_name().and_then(|x| x.to_str()).unwrap());
-    let mut output = File::create(output_name).ok().expect("cannot create output file");
+    let mut output = File::create(output_name).expect("cannot create output file");
     let duration = time::Duration::span(||
                                         process(input, &mut output));
     println!("{}s.", duration.num_seconds());
