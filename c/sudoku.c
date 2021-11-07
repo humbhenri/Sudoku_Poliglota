@@ -82,7 +82,7 @@ int main(int argc, char const *argv[])
 	fclose(output);
 
 	/* Present time result */
-	printf("-- Elapsed time: %d ms\n", duration);
+	printf("-- Elapsed time: %ld ms\n", duration);
 	return 0;
 }
 
@@ -96,7 +96,7 @@ void to_str(int sudoku[BOARD_SIZE][BOARD_SIZE], char *dest) {
 		}
 		len += sprintf(dest+len, "\n");
 	}
-	len += sprintf(dest+len, "\n");
+	sprintf(dest+len, "\n");
 }
 
 

@@ -6,6 +6,7 @@ const exec = util.promisify(require('child_process').exec);
 
 const make = 'make';
 const make_run = 'make run';
+const make_clean = 'make clean';
 
 const projects = ['c', 
     'clisp', 
@@ -43,6 +44,7 @@ async function run() {
         try {
             process.chdir(p)
             console.log(`Running make at project ${p}`)
+            console.log(await execShell(make_clean))
             console.log(await execShell(make))
             process.chdir(working_dir)
         } catch (error) {

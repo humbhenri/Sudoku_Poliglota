@@ -31,10 +31,31 @@
   (if-let [[x y] (next-empty board)]
     (or (first (filter (comp nil? next-empty)
                        (for [i (range 1 10)
-                             :when (can-put? board [x y] i)
-                             :let [board* (-> (assoc-in board [x y] i) (solve))]] board*)))
+                                       :when (can-put? board [x y] i)
+                                       :let [board* (-> (assoc-in board [x y] i) (solve))]] board*)))
         board) ; impossible from here, backtrack
     board))
+
+
+(defn lazy-put-board
+  ([board x y]
+   (lazy-put-board board x y 1))
+  ([board x y n]
+   (cond (>= n 10) nil
+         (can-put? board [x y] n) (cons
+                                   (assoc-in board [x y] n)
+                                   (lazy-seq (lazy-put-board board x y (inc n))))
+         :else (lazy-put-board board x y (inc n)))))
+
+
+(defn solve-2 [board]
+  (if-let [[x y] (next-empty board)]
+    (or (first
+         (filter
+          (comp nil? next-empty)
+          (map solve (lazy-put-board board x y))))
+        board
+    board)))
 
 
 ;;; progress bar
