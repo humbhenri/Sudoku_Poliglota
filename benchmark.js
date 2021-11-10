@@ -3,10 +3,12 @@ Run make run on all sub folders, measure time and order by time spent
 */
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const os = require('os');
 
-const make = 'make';
-const make_run = 'make run';
-const make_clean = 'make clean';
+const cpuCount = os.cpus().length
+const make = 'make'
+const make_run = 'make run'
+const make_clean = 'make clean'
 
 const projects = ['c',
     'clisp',
@@ -67,11 +69,26 @@ async function solve(project) {
     }
 }
 
+function splitArray(array, chunkSize) {
+    let i,j, temporary
+    const result = []
+    for (i = 0,j = array.length; i < j; i += chunkSize) {
+        temporary = array.slice(i, i + chunkSize);
+        result.push(temporary)
+    }
+    return result
+}
+
 async function run() {
     console.log('Running make run on all sub projects')
     await Promise.all(projects.map(project => runMake(project)))
     console.log('Benchmarking ...')
-    const results = await Promise.all(projects.map(project => solve(project)))
+    // const results = await Promise.all(projects.map(project => solve(project)))
+    let results = []
+    for (let group of splitArray(projects, cpuCount)) {
+        const groupResults = await Promise.all(group.map(project => solve(project)))
+        results = results.concat(groupResults)
+    }
     results.sort((a, b) => a.elapsed_time_ms - b.elapsed_time_ms)
     console.table(results)
 }

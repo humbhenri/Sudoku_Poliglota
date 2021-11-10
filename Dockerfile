@@ -34,4 +34,4 @@ RUN apt-get install -y lua5.3
 RUN curl -sSL https://get.haskellstack.org/ | sh
 WORKDIR /app
 COPY . .
-CMD ["node", "benchmark.js"]
+CMD ["sh", "benchmark.sh"]
