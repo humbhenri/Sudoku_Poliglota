@@ -1,6 +1,7 @@
 import unittest
-from .sudoku import *
 from copy import deepcopy
+import io
+from .sudoku import from_str, to_str, solve, process
 
 SUDOKU_SAMPLE = [
             [2, 0, 0, 0, 0, 0, 0, 6, 0],
@@ -57,13 +58,13 @@ class TestSudoku(unittest.TestCase):
         self.assertEqual(SUDOKU_SOLUTION, solve(deepcopy(SUDOKU_SAMPLE)))
 
     def test_process(self):
-        input = io.StringIO()
-        input.write(SUDOKU_SAMPLE_LINE)
-        input.seek(0)
+        file_input = io.StringIO()
+        file_input.write(SUDOKU_SAMPLE_LINE)
+        file_input.seek(0)
         output = io.StringIO()
-        process(input, output)
+        process(file_input, output)
         results = output.getvalue()
-        input.close()
+        file_input.close()
         output.close()
         self.assertEqual(SUDOKU_SOLUTION_FORMATED.strip(), results.strip())
 

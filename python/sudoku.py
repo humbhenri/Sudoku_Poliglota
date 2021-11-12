@@ -7,28 +7,11 @@ import os
 
 BOARD_SIZE = 9
 
-
-def show_progress_bar(step, total_steps, resolution, width):
-    if total_steps / resolution == 0:
-        return
-    if step % (total_steps / resolution) != 0:
-        return
-    ratio = step / float(total_steps)
-    count = int(ratio * width)
-    print('%3d%% ['.format(int(ratio * 100)))
-    for x in range(0, count):
-        sys.stdout.write('=')
-    for x in range(count, width):
-        sys.stdout.write(' ')
-    sys.stdout.write(']\r')
-    sys.stdout.flush()
-
-
 def next_empty(sudoku):
-    empty_slots = ((i, j) 
-        for i in range(0, BOARD_SIZE) 
-        for j in range(0, BOARD_SIZE) 
-        if sudoku[i][j] == 0) 
+    empty_slots = ((i, j)
+        for i in range(0, BOARD_SIZE)
+        for j in range(0, BOARD_SIZE)
+        if sudoku[i][j] == 0)
     return next(empty_slots, None)
 
 
@@ -40,7 +23,7 @@ def can_put(sudoku, x, y, val):
     if any(sudoku[i][j] == val for i in range(sq_x, sq_x + 3) for j in range(sq_y, sq_y + 3)):
         return False
     return True
-    
+
 
 def solve(sudoku):
     spot = next_empty(sudoku)
@@ -67,20 +50,54 @@ def from_str(data):
     return [list(map(int, row)) for row in rows]
 
 
-def process(input, output):
-    data = input.read()
+class Process:
+    "Iterate over sudokus solving one by one"
+    def __init__(self, sudokus):
+        self.sudokus = sudokus
+        self.index = 0
+        self.total_steps = len(self.sudokus)
+        self.resolution = 100
+        self.width = 50
+    def __next__(self):
+        try:
+            sudoku = self.sudokus[self.index]
+            self.index += 1
+            solved = solve(from_str(sudoku))
+            self.show_progress_bar()
+            return solved
+        except IndexError:
+            self.index = 0
+            raise StopIteration from IndexError
+    def __iter__(self):
+        return self
+    def show_progress_bar(self):
+        "Update progress bar"
+        if self.total_steps / self.resolution == 0:
+            return
+        step = self.index
+        ratio = step / float(self.total_steps)
+        count = int(ratio * self.width)
+        percent = ratio * 100
+        print(f'{percent:.2f}% [', end='', flush=True)
+        for _ in range(0, count):
+            print('=', end='', flush=True)
+        for _ in range(count, self.width):
+            print(' ', end='', flush=True)
+        print(']\r', end='', flush=True)
+
+
+def process(file_input, file_output):
+    data = file_input.read()
     before = time.time()
     sudokus = data.splitlines()
-    total_sudokus = len(sudokus)
     solved_sudokus = 0
-    for line in sudokus:
-        sudoku = from_str(line)
-        sudoku = solve(sudoku)
-        output.write(to_str(sudoku) + '\n')
+    for solved_sudoku in Process(sudokus):
+        file_output.write(to_str(solved_sudoku) + '\n')
         solved_sudokus += 1
-        show_progress_bar(step=solved_sudokus, total_steps=total_sudokus, resolution=100, width=50)
     after = time.time()
-    print('--Elapsed {:.2f} ms'.format((after - before) * 1000))
+    print()
+    elapsed_time = (after - before) * 1000
+    print(f'--Elapsed {elapsed_time:.2f} ms')
 
 
 if __name__ == '__main__':
@@ -88,6 +105,6 @@ if __name__ == '__main__':
         print('Please inform the input file')
         sys.exit(1)
     filename = sys.argv[1]
-    with io.open(filename, 'r') as input, \
-            io.open('solved_' + os.path.basename(filename), 'w') as output: 
-        process(input, output)
+    with io.open(filename, 'r', encoding='utf-8') as file_input, \
+            io.open('solved_' + os.path.basename(filename), 'w', encoding='utf-8') as file_output:
+        process(file_input, file_output)
