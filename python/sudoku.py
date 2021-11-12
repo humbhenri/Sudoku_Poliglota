@@ -7,47 +7,42 @@ import os
 
 BOARD_SIZE = 9
 
-def next_empty(sudoku):
-    empty_slots = ((i, j)
-        for i in range(0, BOARD_SIZE)
-        for j in range(0, BOARD_SIZE)
-        if sudoku[i][j] == 0)
-    return next(empty_slots, None)
 
+class Sudoku:
+    def __init__(self, line):
+        self.data = self.from_str(line)
+    def from_str(self, line):
+        rows = (line[i:i + BOARD_SIZE] for i in range(0, len(line), BOARD_SIZE))
+        return [list(map(int, row)) for row in rows]
+    def next_empty(self):
+        empty_slots = ((i, j)
+            for i in range(0, BOARD_SIZE)
+            for j in range(0, BOARD_SIZE)
+            if self.data[i][j] == 0)
+        return next(empty_slots, None)
+    def can_put(self, x, y, val):
+        if any(val in (self.data[i][y], self.data[x][i]) for i in range(0, BOARD_SIZE)):
+            return False
+        sq_x = x - (x % 3)
+        sq_y = y - (y % 3)
+        if any(self.data[i][j] == val for i in range(sq_x, sq_x + 3) for j in range(sq_y, sq_y + 3)):
+            return False
+        return True
+    def solve(self):
+        spot = self.next_empty()
+        if spot is None:
+            return
+        x, y = spot
+        for i in range(1, 10):
+            if self.can_put(x, y, i):
+                self.data[x][y] = i
+                self.solve()
+                if self.next_empty() is None:
+                    return #found solution
 
-def can_put(sudoku, x, y, val):
-    if any(val in (sudoku[i][y], sudoku[x][i]) for i in range(0, BOARD_SIZE)):
-        return False
-    sq_x = x - (x % 3)
-    sq_y = y - (y % 3)
-    if any(sudoku[i][j] == val for i in range(sq_x, sq_x + 3) for j in range(sq_y, sq_y + 3)):
-        return False
-    return True
-
-
-def solve(sudoku):
-    spot = next_empty(sudoku)
-    if spot is None:
-        return sudoku
-    x, y = spot
-    for i in range(1, 10):
-        if can_put(sudoku, x, y, i):
-            sudoku[x][y] = i
-            new_sudoku = solve(sudoku)
-            if next_empty(new_sudoku) is None:
-                return new_sudoku  #found solution
-
-    sudoku[x][y] = 0  #solution not found, backtrack
-    return sudoku
-
-
-def to_str(sudoku):
-    return '\n'.join(' '.join(map(str, row)) for row in sudoku)
-
-
-def from_str(data):
-    rows = (data[i:i + BOARD_SIZE] for i in range(0, len(data), BOARD_SIZE))
-    return [list(map(int, row)) for row in rows]
+        self.data[x][y] = 0  #solution not found, backtrack
+    def to_str(self):
+        return '\n'.join(' '.join(map(str, row)) for row in self.data)
 
 
 class Process:
@@ -60,11 +55,11 @@ class Process:
         self.width = 50
     def __next__(self):
         try:
-            sudoku = self.sudokus[self.index]
+            s = Sudoku(self.sudokus[self.index])
+            s.solve()
             self.index += 1
-            solved = solve(from_str(sudoku))
             self.show_progress_bar()
-            return solved
+            return s
         except IndexError:
             self.index = 0
             raise StopIteration from IndexError
@@ -92,7 +87,7 @@ def process(file_input, file_output):
     sudokus = data.splitlines()
     solved_sudokus = 0
     for solved_sudoku in Process(sudokus):
-        file_output.write(to_str(solved_sudoku) + '\n')
+        file_output.write(solved_sudoku.to_str() + '\n\n')
         solved_sudokus += 1
     after = time.time()
     print()

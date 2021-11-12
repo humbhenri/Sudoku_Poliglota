@@ -1,7 +1,6 @@
 import unittest
-from copy import deepcopy
 import io
-from .sudoku import from_str, to_str, solve, process
+from .sudoku import Sudoku, Process
 
 SUDOKU_SAMPLE = [
             [2, 0, 0, 0, 0, 0, 0, 6, 0],
@@ -37,7 +36,7 @@ SUDOKU_SOLUTION = [[2, 7, 3, 4, 8, 1, 9, 6, 5],
                    [6, 8, 5, 7, 3, 4, 2, 9, 1],
                    [7, 9, 2, 1, 5, 6, 3, 8, 4]]
 
-SUDOKU_SOLUTION_FORMATED = u"""2 7 3 4 8 1 9 6 5
+SUDOKU_SOLUTION_FORMATED = """2 7 3 4 8 1 9 6 5
 9 1 6 2 7 5 4 3 8
 5 4 8 6 9 3 1 2 7
 8 5 9 3 4 7 6 1 2
@@ -49,24 +48,23 @@ SUDOKU_SOLUTION_FORMATED = u"""2 7 3 4 8 1 9 6 5
 
 class TestSudoku(unittest.TestCase):
     def test_from_str(self):
-        self.assertEqual(SUDOKU_SAMPLE, from_str(SUDOKU_SAMPLE_LINE))
+        s = Sudoku(SUDOKU_SAMPLE_LINE)
+        self.assertEqual(SUDOKU_SAMPLE, s.data)
 
     def test_to_str(self):
-        self.assertEqual(SUDOKU_SAMPLE_FORMATED.strip(), to_str(SUDOKU_SAMPLE).strip())
+        s = Sudoku(SUDOKU_SAMPLE_LINE)
+        self.assertEqual(SUDOKU_SAMPLE_FORMATED.strip(), s.to_str().strip())
 
     def test_solve(self):
-        self.assertEqual(SUDOKU_SOLUTION, solve(deepcopy(SUDOKU_SAMPLE)))
+        s = Sudoku(SUDOKU_SAMPLE_LINE)
+        s.solve()
+        self.assertEqual(SUDOKU_SOLUTION, s.data)
 
     def test_process(self):
-        file_input = io.StringIO()
-        file_input.write(SUDOKU_SAMPLE_LINE)
-        file_input.seek(0)
-        output = io.StringIO()
-        process(file_input, output)
-        results = output.getvalue()
-        file_input.close()
-        output.close()
-        self.assertEqual(SUDOKU_SOLUTION_FORMATED.strip(), results.strip())
+        results = []
+        for solved_sudoku in Process([SUDOKU_SAMPLE_LINE]):
+            results.append(solved_sudoku.to_str() + '\n')
+        self.assertEqual(SUDOKU_SOLUTION_FORMATED.strip(), ''.join(results).strip())
 
 if __name__ == '__main__':
     unittest.main()
