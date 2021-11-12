@@ -32,6 +32,7 @@ RUN curl https://nim-lang.org/choosenim/init.sh -sSf -o /root/init.sh && \
 ENV PATH $PATH:/root/.nimble/bin
 RUN apt-get install -y lua5.3
 RUN curl -sSL https://get.haskellstack.org/ | sh
+RUN apt-get install -y parallel
 WORKDIR /app
 COPY . .
-CMD ["sh", "benchmark.sh"]
+CMD ["bash", "benchmark.sh"]
