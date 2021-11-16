@@ -1,42 +1,42 @@
 # solve a sudoku using backtrack
 use strict;
+use autodie;
 use warnings;
 use Scalar::Util qw( looks_like_number );
 use Time::HiRes qw( time );
+use File::Basename;
 use constant ROW_SIZE => 9;
 
+sub next_empty {
+    my $sudoku = shift;
+    for my $row (0 .. ROW_SIZE-1) {
+        for my $col (0 .. ROW_SIZE-1) {
+            if ($$sudoku[$row][$col] == 0) { return ($row, $col); }
+        }
+    }
+    return ();
+}
+
+sub can_put {
+    my ($sudoku, $x, $y, $val) = @_;
+    for my $i (0 .. ROW_SIZE - 1) {
+        if ($$sudoku[$x][$i] == $val) { return 0; }
+        if ($$sudoku[$i][$y] == $val) { return 0; }
+    }
+    my $sq_x = $x - ($x % 3);
+    my $sq_y = $y - ($y % 3);
+    for my $row ($sq_x .. $sq_x + 2) {
+        for my $col ($sq_y .. $sq_y + 2) {
+            if ($$sudoku[$row][$col] == $val) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+
+}
+
 sub solve {
-
-    sub next_empty {
-        my $sudoku = shift;
-        for my $row (0 .. ROW_SIZE-1) {
-            for my $col (0 .. ROW_SIZE-1) {
-
-                if ($$sudoku[$row][$col] == 0) { return ($row, $col); }
-            }
-        }
-        return ();
-    }
-
-    sub can_put {
-        my ($sudoku, $x, $y, $val) = @_;
-        for my $i (0 .. ROW_SIZE - 1) {
-            if ($$sudoku[$x][$i] == $val) { return 0; }
-            if ($$sudoku[$i][$y] == $val) { return 0; }
-        }
-        my $sq_x = $x - ($x % 3);
-        my $sq_y = $y - ($y % 3);
-        for my $row ($sq_x .. $sq_x + 2) {
-            for my $col ($sq_y .. $sq_y + 2) {
-                if ($$sudoku[$row][$col] == $val) {
-                    return 0;
-                }
-            }
-        }
-        return 1;
-
-    }
-
     my $sudoku = shift;
     my @spot = next_empty $sudoku;
     if (@spot) {
@@ -86,11 +86,12 @@ sub load_bar {
         printf("]\r");
         $|++; #flush
     }
+    return;
 }
 
 # read sudokus into memory
 my $input = $ARGV[0];
-open my $in, "<", $input or die "Can't open input file";
+open my $in, "<", $input;
 my $data;
 read $in, $data, -s $input;
 close $in;
@@ -109,8 +110,10 @@ for my $step (0 .. $#rows) {
 my $diff = time() - $start_time;
 
 # write solutions to file
-open my $out, ">", "solved_" . $input or die "Can't open output file";
-print $out $result;
-close $out;
+open my $fh, ">", "solved_" . basename($input);
+print $fh $result;
+close $fh;
 
 print " -- Elapsed time: $diff s.\n";
+
+1;
