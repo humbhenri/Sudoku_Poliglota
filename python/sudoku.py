@@ -41,7 +41,7 @@ class Sudoku:
                     return #found solution
 
         self.data[x][y] = 0  #solution not found, backtrack
-    def to_str(self):
+    def __str__(self):
         return '\n'.join(' '.join(map(str, row)) for row in self.data)
 
 
@@ -87,7 +87,7 @@ def process(file_input, file_output):
     sudokus = data.splitlines()
     solved_sudokus = 0
     for solved_sudoku in Process(sudokus):
-        file_output.write(solved_sudoku.to_str() + '\n\n')
+        file_output.write(str(solved_sudoku) + '\n\n')
         solved_sudokus += 1
     after = time.time()
     print()

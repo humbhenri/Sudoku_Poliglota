@@ -53,7 +53,7 @@ class TestSudoku(unittest.TestCase):
 
     def test_to_str(self):
         s = Sudoku(SUDOKU_SAMPLE_LINE)
-        self.assertEqual(SUDOKU_SAMPLE_FORMATED.strip(), s.to_str().strip())
+        self.assertEqual(SUDOKU_SAMPLE_FORMATED.strip(), str(s).strip())
 
     def test_solve(self):
         s = Sudoku(SUDOKU_SAMPLE_LINE)
@@ -63,7 +63,7 @@ class TestSudoku(unittest.TestCase):
     def test_process(self):
         results = []
         for solved_sudoku in Process([SUDOKU_SAMPLE_LINE]):
-            results.append(solved_sudoku.to_str() + '\n')
+            results.append(str(solved_sudoku) + '\n')
         self.assertEqual(SUDOKU_SOLUTION_FORMATED.strip(), ''.join(results).strip())
 
 if __name__ == '__main__':
