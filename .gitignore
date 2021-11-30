@@ -163,9 +163,7 @@ pip-log.txt
 .DS_Store
 
 solved_input_huge.txt
-
-solved_input_huge.txt
-
+Solved_input_huge.txt
 solved_input_small.txt
 
 *.o

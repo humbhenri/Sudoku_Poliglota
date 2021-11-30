@@ -108,7 +108,6 @@ total = lines.length
 # solve all sudokus
 lines.each_with_index do
   |line, index|
-  before = Time.now
   sudoku = from_str line
   result << to_str(solve(sudoku))
   load_bar index, total, 20, 50
